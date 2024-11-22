@@ -4,8 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/google/uuid"
 	"log/slog"
+
+	"github.com/google/uuid"
+
 	"machineIssuerSystem/internal/model"
 )
 
@@ -15,6 +17,9 @@ type Storage interface {
 	GetServer(ctx context.Context, serverID uuid.UUID) (model.Server, error)
 	RentServer(ctx context.Context, serverID uuid.UUID, userID uuid.UUID) error
 	UnRentServer(ctx context.Context, serverID uuid.UUID) error
+
+	CreateUser(ctx context.Context, user model.User) (result model.User, err error)
+	GetUserByUsername(ctx context.Context, username string) (model.User, error)
 }
 
 type Core struct {

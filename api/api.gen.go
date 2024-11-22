@@ -28,14 +28,14 @@ type Server struct {
 
 // SignInJSONBody defines parameters for SignIn.
 type SignInJSONBody struct {
-	Name     *string `json:"name,omitempty"`
 	Password *string `json:"password,omitempty"`
+	Username *string `json:"username,omitempty"`
 }
 
 // SignUpJSONBody defines parameters for SignUp.
 type SignUpJSONBody struct {
-	Name     *string `json:"name,omitempty"`
 	Password *string `json:"password,omitempty"`
+	Username *string `json:"username,omitempty"`
 }
 
 // SignInJSONRequestBody defines body for SignIn for application/json ContentType.
