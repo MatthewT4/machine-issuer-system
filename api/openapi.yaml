@@ -5,13 +5,52 @@ info:
   version: 1.0.0
 servers:
   - url: 'https'
+tags:
+  - name: User
+    description: Операции с пользователями
+  - name: Product
+    description: Операции с продуктами
+
 paths:
-  /products/{product_id}:
+#  /users/{user_id}:
+#    get:
+#      description: Get user
+#      operationId: GetUser
+#      tags:
+#        - User
+#      parameters:
+#        - name: user_id
+#          in: path
+#          required: true
+#          schema:
+#            type: string
+#            format: uuid
+#      responses:
+#        200:
+#          description: Return user
+#          content:
+#            application/json:
+#              schema:
+#                type: array
+#                items:
+#                  $ref: "#/components/schemas/User"
+  /servers/available:
     get:
-      description: Get product
-      operationId: GetProduct
+      operationId: GetAvailableServers
+      responses:
+        200:
+          description: Return servers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Server"
+  /rent/{server_id}:
+    post:
+      operationId: RentServer
       parameters:
-        - name: product_id
+        - name: server_id
           in: path
           required: true
           schema:
@@ -19,17 +58,18 @@ paths:
             format: uuid
       responses:
         200:
-          description: Return product
+          description: Return user
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Product"
+                  $ref: "#/components/schemas/Server"
+
 
 components:
   schemas:
-    Product:
+    Server:
       type: object
       properties:
         id:
@@ -37,13 +77,20 @@ components:
           format: uuid
         title:
           type: string
-        description:
+        cpu:
+          format: int
+          description: core
+        memory:
+          format: int
+          description: MB
+        disk:
+          format: int
+          description: MB
+    User:
+      type: object
+      properties:
+        id:
           type: string
-        tags:
-          type: array
-          items:
-            type: string
-        image_urls:
-          type: array
-          items:
-            type: string
+          format: uuid
+        name:
+          type: string

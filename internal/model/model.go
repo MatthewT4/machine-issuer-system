@@ -9,3 +9,19 @@ type Product struct {
 	Tags        []string
 	ImageURLs   []string
 }
+
+type User struct {
+	ID       uuid.UUID
+	Login    string
+	Password string
+	IsAdmin  bool
+}
+
+type Server struct {
+	ID     uuid.UUID
+	Title  string
+	CPU    int
+	Memory int
+	Disk   int
+	RentBy uuid.UUID
+}

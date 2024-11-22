@@ -12,20 +12,28 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
-// Product defines model for Product.
-type Product struct {
-	Description *string             `json:"description,omitempty"`
-	Id          *openapi_types.UUID `json:"id,omitempty"`
-	ImageUrls   *[]string           `json:"image_urls,omitempty"`
-	Tags        *[]string           `json:"tags,omitempty"`
-	Title       *string             `json:"title,omitempty"`
+// Server defines model for Server.
+type Server struct {
+	// Cpu core
+	Cpu *interface{} `json:"cpu,omitempty"`
+
+	// Disk MB
+	Disk *interface{}        `json:"disk,omitempty"`
+	Id   *openapi_types.UUID `json:"id,omitempty"`
+
+	// Memory MB
+	Memory *interface{} `json:"memory,omitempty"`
+	Title  *string      `json:"title,omitempty"`
 }
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 
-	// (GET /products/{product_id})
-	GetProduct(ctx echo.Context, productId openapi_types.UUID) error
+	// (POST /rent/{server_id})
+	RentServer(ctx echo.Context, serverId openapi_types.UUID) error
+
+	// (GET /servers/available)
+	GetAvailableServers(ctx echo.Context) error
 }
 
 // ServerInterfaceWrapper converts echo contexts to parameters.
@@ -33,19 +41,28 @@ type ServerInterfaceWrapper struct {
 	Handler ServerInterface
 }
 
-// GetProduct converts echo context to params.
-func (w *ServerInterfaceWrapper) GetProduct(ctx echo.Context) error {
+// RentServer converts echo context to params.
+func (w *ServerInterfaceWrapper) RentServer(ctx echo.Context) error {
 	var err error
-	// ------------- Path parameter "product_id" -------------
-	var productId openapi_types.UUID
+	// ------------- Path parameter "server_id" -------------
+	var serverId openapi_types.UUID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "product_id", ctx.Param("product_id"), &productId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "server_id", ctx.Param("server_id"), &serverId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter product_id: %s", err))
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter server_id: %s", err))
 	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.GetProduct(ctx, productId)
+	err = w.Handler.RentServer(ctx, serverId)
+	return err
+}
+
+// GetAvailableServers converts echo context to params.
+func (w *ServerInterfaceWrapper) GetAvailableServers(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetAvailableServers(ctx)
 	return err
 }
 
@@ -77,6 +94,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 		Handler: si,
 	}
 
-	router.GET(baseURL+"/products/:product_id", wrapper.GetProduct)
+	router.POST(baseURL+"/rent/:server_id", wrapper.RentServer)
+	router.GET(baseURL+"/servers/available", wrapper.GetAvailableServers)
 
 }
