@@ -12,6 +12,56 @@ tags:
     description: Операции с продуктами
 
 paths:
+  /auth/signup:
+    post:
+      operationId: SignUp
+      summary: User registration
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                password:
+                  type: string
+      responses:
+        200:
+          description: successful sign up
+        500:
+          description: internal error
+
+  /auth/signin:
+    post:
+      operationId: SignIn
+      summary: User login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                password:
+                  type: string
+      responses:
+        200:
+          description: successful sign in
+        500:
+          description: internal error
+
+  /auth/signout:
+    get:
+      operationId: SignOut
+      summary: User logout
+      responses:
+        200:
+          description: successful sign out
+        500:
+          description: internal error
+
 #  /users/{user_id}:
 #    get:
 #      description: Get user

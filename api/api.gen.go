@@ -26,8 +26,35 @@ type Server struct {
 	Title  *string      `json:"title,omitempty"`
 }
 
+// SignInJSONBody defines parameters for SignIn.
+type SignInJSONBody struct {
+	Name     *string `json:"name,omitempty"`
+	Password *string `json:"password,omitempty"`
+}
+
+// SignUpJSONBody defines parameters for SignUp.
+type SignUpJSONBody struct {
+	Name     *string `json:"name,omitempty"`
+	Password *string `json:"password,omitempty"`
+}
+
+// SignInJSONRequestBody defines body for SignIn for application/json ContentType.
+type SignInJSONRequestBody SignInJSONBody
+
+// SignUpJSONRequestBody defines body for SignUp for application/json ContentType.
+type SignUpJSONRequestBody SignUpJSONBody
+
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
+	// User login
+	// (POST /auth/signin)
+	SignIn(ctx echo.Context) error
+	// User logout
+	// (GET /auth/signout)
+	SignOut(ctx echo.Context) error
+	// User registration
+	// (POST /auth/signup)
+	SignUp(ctx echo.Context) error
 
 	// (POST /rent/{server_id})
 	RentServer(ctx echo.Context, serverId openapi_types.UUID) error
@@ -39,6 +66,33 @@ type ServerInterface interface {
 // ServerInterfaceWrapper converts echo contexts to parameters.
 type ServerInterfaceWrapper struct {
 	Handler ServerInterface
+}
+
+// SignIn converts echo context to params.
+func (w *ServerInterfaceWrapper) SignIn(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.SignIn(ctx)
+	return err
+}
+
+// SignOut converts echo context to params.
+func (w *ServerInterfaceWrapper) SignOut(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.SignOut(ctx)
+	return err
+}
+
+// SignUp converts echo context to params.
+func (w *ServerInterfaceWrapper) SignUp(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.SignUp(ctx)
+	return err
 }
 
 // RentServer converts echo context to params.
@@ -94,6 +148,9 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 		Handler: si,
 	}
 
+	router.POST(baseURL+"/auth/signin", wrapper.SignIn)
+	router.GET(baseURL+"/auth/signout", wrapper.SignOut)
+	router.POST(baseURL+"/auth/signup", wrapper.SignUp)
 	router.POST(baseURL+"/rent/:server_id", wrapper.RentServer)
 	router.GET(baseURL+"/servers/available", wrapper.GetAvailableServers)
 
