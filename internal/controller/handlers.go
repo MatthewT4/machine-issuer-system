@@ -2,33 +2,38 @@ package controller
 
 import (
 	"errors"
+	"log/slog"
+	"net/http"
+
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	openapi_types "github.com/oapi-codegen/runtime/types"
-	"log/slog"
+
+	"machineIssuerSystem/internal/config"
 	"machineIssuerSystem/internal/core"
 	"machineIssuerSystem/internal/model"
-	"net/http"
 )
 
 var userID = uuid.MustParse("00000000-0000-0000-0000-000000000001")
 
-type productHandlers struct {
+type handlers struct {
 	core *core.Core
 
 	logger *slog.Logger
+	cfg    config.Config
 }
 
-func newProductHandlers(core *core.Core, logger *slog.Logger) *productHandlers {
-	return &productHandlers{
+func newHandlers(core *core.Core, logger *slog.Logger, cfg config.Config) *handlers {
+	return &handlers{
 		core: core,
 
 		logger: logger,
+		cfg:    cfg,
 	}
 }
 
 // (POST /rent/{server_id})
-func (p *productHandlers) RentServer(ctx echo.Context, serverId openapi_types.UUID) error {
+func (p *handlers) RentServer(ctx echo.Context, serverId openapi_types.UUID) error {
 	err := p.core.RentServer(
 		ctx.Request().Context(),
 		userID,
@@ -37,7 +42,7 @@ func (p *productHandlers) RentServer(ctx echo.Context, serverId openapi_types.UU
 	return p.convertCoreErrorToResponse(err)
 }
 
-func (p *productHandlers) UnRentServer(ctx echo.Context, serverId openapi_types.UUID) error {
+func (p *handlers) UnRentServer(ctx echo.Context, serverId openapi_types.UUID) error {
 	p.logger.Debug("handle UnRentServer", slog.Any("server_id", serverId))
 	err := p.core.UnRentServer(
 		ctx.Request().Context(),
@@ -47,7 +52,7 @@ func (p *productHandlers) UnRentServer(ctx echo.Context, serverId openapi_types.
 }
 
 // (GET /servers/available)
-func (p *productHandlers) GetAvailableServers(ctx echo.Context) error {
+func (p *handlers) GetAvailableServers(ctx echo.Context) error {
 	servers, err := p.core.GetAvailableServers(ctx.Request().Context())
 	if err != nil {
 		var errNotFound *model.ErrNotFound
@@ -63,7 +68,7 @@ func (p *productHandlers) GetAvailableServers(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, servers)
 }
 
-func (p *productHandlers) GetProduct(ctx echo.Context, productId openapi_types.UUID) error {
+func (p *handlers) GetProduct(ctx echo.Context, productId openapi_types.UUID) error {
 	p.logger.Info("Get product request", slog.Any("productId", productId))
 
 	product, err := p.core.GetProduct(ctx.Request().Context(), productId)
@@ -82,7 +87,7 @@ func (p *productHandlers) GetProduct(ctx echo.Context, productId openapi_types.U
 	return ctx.JSON(http.StatusOK, product)
 }
 
-func (p *productHandlers) convertCoreErrorToResponse(err error) error {
+func (p *handlers) convertCoreErrorToResponse(err error) error {
 	if err == nil {
 		return nil
 	}

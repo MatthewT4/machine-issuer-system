@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"time"
 
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 
 	"machineIssuerSystem/internal/model"
-	"machineIssuerSystem/pkg/constants"
 	"machineIssuerSystem/pkg/errorlist"
 	"machineIssuerSystem/pkg/jwt"
 	"machineIssuerSystem/pkg/roles"
@@ -45,7 +45,7 @@ func (c *Core) SignUp(ctx context.Context, params model.SignUpRequest) (token st
 		return token, err
 	}
 
-	token, err = jwt.NewToken(user, constants.Secret, constants.TTL)
+	token, err = jwt.NewToken(user, c.cfg.Auth.SecretKey, time.Duration(c.cfg.Auth.TTL)*time.Hour)
 	if err != nil {
 		log.Error("failed to generate token", err.Error())
 
@@ -78,7 +78,7 @@ func (c *Core) SignIn(ctx context.Context, params model.SignInRequest) (token st
 		return "", fmt.Errorf("%s: %w", op, errorlist.ErrInvalidCredentials)
 	}
 
-	token, err = jwt.NewToken(user, constants.Secret, constants.TTL)
+	token, err = jwt.NewToken(user, c.cfg.Auth.SecretKey, time.Duration(c.cfg.Auth.TTL)*time.Hour)
 	if err != nil {
 		log.Error("failed to generate token", err.Error())
 

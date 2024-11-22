@@ -15,6 +15,7 @@ func GetConfig() (Config, error) {
 }
 
 type Auth struct {
-	SecretKey string `env:"SECRET_KEY"`
-	TTL       string `env:"TTL"`
+	SecretKey  string `env:"SECRET_KEY"`
+	TTL        int64  `env:"TTL"` // hours
+	CookieName string `env:"COOKIE_NAME"`
 }

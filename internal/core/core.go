@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/uuid"
 
+	"machineIssuerSystem/internal/config"
 	"machineIssuerSystem/internal/model"
 )
 
@@ -26,13 +27,15 @@ type Core struct {
 	storage Storage
 
 	logger *slog.Logger
+	cfg    config.Config
 }
 
-func NewCore(storage Storage, logger *slog.Logger) *Core {
+func NewCore(storage Storage, logger *slog.Logger, cfg config.Config) *Core {
 	return &Core{
 		storage: storage,
 
 		logger: logger,
+		cfg:    cfg,
 	}
 }
 

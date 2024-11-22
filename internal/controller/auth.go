@@ -9,10 +9,9 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"machineIssuerSystem/internal/model"
-	"machineIssuerSystem/pkg/constants"
 )
 
-func (h *productHandlers) SignUp(ctx echo.Context) error {
+func (h *handlers) SignUp(ctx echo.Context) error {
 	body, err := io.ReadAll(ctx.Request().Body)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -29,15 +28,15 @@ func (h *productHandlers) SignUp(ctx echo.Context) error {
 	}
 
 	ctx.SetCookie(&http.Cookie{
-		Name:    "session_token",
+		Name:    h.cfg.Auth.CookieName,
 		Value:   token,
-		Expires: time.Now().Add(constants.TTL),
+		Expires: time.Now().Add(time.Duration(h.cfg.Auth.TTL) * time.Hour),
 	})
 
 	return ctx.String(http.StatusCreated, "Sign up successfully")
 }
 
-func (h *productHandlers) SignIn(ctx echo.Context) error {
+func (h *handlers) SignIn(ctx echo.Context) error {
 	body, err := io.ReadAll(ctx.Request().Body)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -55,17 +54,17 @@ func (h *productHandlers) SignIn(ctx echo.Context) error {
 	}
 
 	ctx.SetCookie(&http.Cookie{
-		Name:    "session_token",
+		Name:    h.cfg.Auth.CookieName,
 		Value:   token,
-		Expires: time.Now().Add(constants.TTL),
+		Expires: time.Now().Add(time.Duration(h.cfg.Auth.TTL) * time.Hour),
 	})
 
 	return ctx.String(http.StatusCreated, "Sign in successfully")
 }
 
-func (h *productHandlers) SignOut(ctx echo.Context) error {
+func (h *handlers) SignOut(ctx echo.Context) error {
 	ctx.SetCookie(&http.Cookie{
-		Name:    "session_token",
+		Name:    h.cfg.Auth.CookieName,
 		Value:   "",
 		Expires: time.Now(),
 	})

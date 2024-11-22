@@ -2,9 +2,13 @@ package controller
 
 import (
 	"fmt"
-	"github.com/labstack/echo/v4"
+
 	"log/slog"
+
+	"github.com/labstack/echo/v4"
+
 	"machineIssuerSystem/api"
+	"machineIssuerSystem/internal/config"
 	"machineIssuerSystem/internal/core"
 )
 
@@ -15,11 +19,13 @@ type Controller struct {
 	logger *slog.Logger
 }
 
-func NewController(core *core.Core, port uint16, logger *slog.Logger) *Controller {
+func NewController(core *core.Core, port uint16, logger *slog.Logger, cfg config.Config) *Controller {
 	e := echo.New()
 
-	productHandlers := newProductHandlers(core, logger)
+	productHandlers := newHandlers(core, logger, cfg)
 	api.RegisterHandlers(e, productHandlers)
+
+	e.Use(productHandlers.AuthMiddleware)
 
 	return &Controller{
 		core:   core,
