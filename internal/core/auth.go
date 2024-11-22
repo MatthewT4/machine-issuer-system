@@ -87,3 +87,10 @@ func (c *Core) SignIn(ctx context.Context, params model.SignInRequest) (token st
 
 	return token, nil
 }
+
+func (c *Core) GetPermissionHandler(
+	ctx context.Context,
+	params model.GetPermissionHandlerRequest,
+) (response model.PermissionHandler, err error) {
+	return c.storage.GetPermissionHandler(ctx, params)
+}

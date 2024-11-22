@@ -18,3 +18,11 @@ CREATE TABLE users
     created_at TIMESTAMP,
     updated_at TIMESTAMP
 );
+
+CREATE TABLE permission_handlers
+(
+    id SERIAL PRIMARY KEY,
+    method TEXT NOT NULL,
+    path TEXT NOT NULL,
+    roles []INTEGER
+)

@@ -12,4 +12,10 @@ SELECT id, email, username, password, role, created_at, updated_at
 FROM user
 WHERE username = $1
 `
+
+	queryGetPermissionHandler = `
+SELECT id, method, path, roles
+FROM permission_handlers
+WHERE method = $1 and path = $2
+`
 )

@@ -14,3 +14,15 @@ type SignInRequest struct {
 type SignOutRequest struct {
 	Username string `json:"username"`
 }
+
+type GetPermissionHandlerRequest struct {
+	Method string
+	Path   string
+}
+
+type PermissionHandler struct {
+	ID     int64
+	Method string
+	Path   string
+	Roles  []int64
+}

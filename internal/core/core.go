@@ -21,6 +21,8 @@ type Storage interface {
 
 	CreateUser(ctx context.Context, user model.User) (result model.User, err error)
 	GetUserByUsername(ctx context.Context, username string) (model.User, error)
+
+	GetPermissionHandler(ctx context.Context, params model.GetPermissionHandlerRequest) (model.PermissionHandler, error)
 }
 
 type Core struct {

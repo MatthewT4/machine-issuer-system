@@ -38,3 +38,22 @@ func (p *PgStorage) GetUserByUsername(ctx context.Context, username string) (res
 
 	return result, nil
 }
+
+func (p *PgStorage) GetPermissionHandler(
+	ctx context.Context,
+	params model.GetPermissionHandlerRequest,
+) (result model.PermissionHandler, err error) {
+	const op = "storage.GetPermissionHandler"
+
+	err = p.connections.QueryRow(
+		ctx,
+		queryGetPermissionHandler,
+		params.Method,
+		params.Path,
+	).Scan(&result)
+	if err != nil {
+		return result, fmt.Errorf("%s: %w", op, err)
+	}
+
+	return result, nil
+}
