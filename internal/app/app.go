@@ -23,7 +23,7 @@ func NewProductorApp(logger *slog.Logger) (*ProductorApp, error) {
 		return nil, fmt.Errorf("get config: %w", err)
 	}
 
-	pgStorage := storage.NewPgStorage(config.DbURL)
+	pgStorage := storage.NewPgStorage(config.DbURL, logger)
 
 	core := appCore.NewCore(pgStorage, logger)
 	api := controller.NewController(core, config.ApiServerPort, logger)

@@ -109,13 +109,26 @@ paths:
       responses:
         200:
           description: Return user
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Server"
-
+        400:
+          description: Server is rent already
+        404:
+          description: Server not found
+    delete:
+      operationId: UnRentServer
+      parameters:
+        - name: server_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Return user
+        400:
+          description: server not rent
+        404:
+          description: Server not found
 
 components:
   schemas:

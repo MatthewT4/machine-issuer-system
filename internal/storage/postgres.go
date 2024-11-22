@@ -14,8 +14,8 @@ type PgStorage struct {
 	logger *slog.Logger
 }
 
-func NewPgStorage(dbURL string) *PgStorage {
-	return &PgStorage{dbURL: dbURL}
+func NewPgStorage(dbURL string, logger *slog.Logger) *PgStorage {
+	return &PgStorage{dbURL: dbURL, logger: logger}
 }
 
 func (p *PgStorage) Connect(ctx context.Context) error {

@@ -23,5 +23,5 @@ type Server struct {
 	CPU    int
 	Memory int
 	Disk   int
-	RentBy uuid.UUID
+	RentBy *uuid.UUID
 }

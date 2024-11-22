@@ -1,17 +1,21 @@
 package model
 
-type baseError struct {
+type BaseError struct {
 	Message string
 }
 
-func (e *baseError) Error() string {
+func (e *BaseError) Error() string {
 	return e.Message
 }
 
 type ErrNotFound struct {
-	baseError
+	BaseError
 }
 
-func (e *ErrNotFound) Error() string {
-	return e.Message
+type ErrInternal struct {
+	BaseError
+}
+
+type ErrBadRequest struct {
+	BaseError
 }
