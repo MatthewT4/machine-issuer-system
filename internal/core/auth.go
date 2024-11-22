@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"log/slog"
 
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 
 	"machineIssuerSystem/internal/model"
 	"machineIssuerSystem/pkg/constants"
 	"machineIssuerSystem/pkg/errorlist"
 	"machineIssuerSystem/pkg/jwt"
+	"machineIssuerSystem/pkg/roles"
 )
 
 func (c *Core) SignUp(ctx context.Context, params model.SignUpRequest) (token string, err error) {
@@ -31,9 +33,11 @@ func (c *Core) SignUp(ctx context.Context, params model.SignUpRequest) (token st
 	}
 
 	user, err := c.storage.CreateUser(ctx, model.User{
+		UUID:         uuid.New(),
 		Username:     params.Username,
 		Email:        params.Email,
 		HashPassword: string(passHash),
+		Role:         roles.User,
 	})
 	if err != nil {
 		log.Error("failed to create user", err.Error())

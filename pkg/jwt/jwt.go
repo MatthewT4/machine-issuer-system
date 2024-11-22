@@ -12,7 +12,7 @@ func NewToken(user model.User, secretKey string, ttl time.Duration) (string, err
 	token := jwt.New(jwt.SigningMethodHS256)
 
 	claims := token.Claims.(jwt.MapClaims)
-	claims["id"] = user.ID
+	claims["id"] = user.UUID
 	claims["email"] = user.Email
 	claims["exp"] = time.Now().Add(ttl).Unix()
 

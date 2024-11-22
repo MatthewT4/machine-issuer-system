@@ -10,13 +10,6 @@ type Product struct {
 	ImageURLs   []string
 }
 
-type User struct {
-	ID       uuid.UUID
-	Login    string
-	Password string
-	IsAdmin  bool
-}
-
 type Server struct {
 	ID     uuid.UUID
 	Title  string
