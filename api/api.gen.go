@@ -56,6 +56,9 @@ type ServerInterface interface {
 	// (POST /auth/signup)
 	SignUp(ctx echo.Context) error
 
+	// (DELETE /rent/{server_id})
+	UnRentServer(ctx echo.Context, serverId openapi_types.UUID) error
+
 	// (POST /rent/{server_id})
 	RentServer(ctx echo.Context, serverId openapi_types.UUID) error
 
@@ -92,6 +95,22 @@ func (w *ServerInterfaceWrapper) SignUp(ctx echo.Context) error {
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.SignUp(ctx)
+	return err
+}
+
+// UnRentServer converts echo context to params.
+func (w *ServerInterfaceWrapper) UnRentServer(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "server_id" -------------
+	var serverId openapi_types.UUID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "server_id", ctx.Param("server_id"), &serverId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter server_id: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.UnRentServer(ctx, serverId)
 	return err
 }
 
@@ -151,6 +170,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.POST(baseURL+"/auth/signin", wrapper.SignIn)
 	router.GET(baseURL+"/auth/signout", wrapper.SignOut)
 	router.POST(baseURL+"/auth/signup", wrapper.SignUp)
+	router.DELETE(baseURL+"/rent/:server_id", wrapper.UnRentServer)
 	router.POST(baseURL+"/rent/:server_id", wrapper.RentServer)
 	router.GET(baseURL+"/servers/available", wrapper.GetAvailableServers)
 
