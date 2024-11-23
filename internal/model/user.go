@@ -13,5 +13,5 @@ type User struct {
 	HashPassword string
 	Role         int64
 	CreatedAt    time.Time
-	UpdatedAt    time.Time
+	UpdatedAt    *time.Time
 }
