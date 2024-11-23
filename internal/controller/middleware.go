@@ -27,19 +27,17 @@ func (h *handlers) AuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 
 		jwtToken := cookie.Value
 
-		claims, err := jwt.ParseToken(jwtToken, h.cfg.AuthSecretKey)
+		claims, err := jwt.ParseToken(jwtToken, []byte(h.cfg.AuthSecretKey))
 		if err != nil {
 			log.Error("failed to parse token: %v", err)
 		}
 
-		fmt.Printf("claims: %+v\n", claims)
-
-		role, ok := claims["role"].(int64)
+		role, ok := claims["role"].(float64)
 		if !ok {
-			log.Warn("no role in cookie: %+v", claims)
+			log.Warn("no role in claims: %+v", claims)
 		}
 
-		log.Info("setting role: %d", role)
+		log.Info("setting role", role)
 
 		c.Set("role", role)
 
@@ -64,9 +62,9 @@ func (h *handlers) PermissionMiddleware(next echo.HandlerFunc) echo.HandlerFunc 
 		path := c.Request().URL.Path
 		ctxRole := c.Get("role")
 
-		var role int64
+		var role float64
 		if ctxRole != nil {
-			role = ctxRole.(int64)
+			role = ctxRole.(float64)
 		}
 
 		log.Info(fmt.Sprintf("user with role: %d", role))
@@ -86,7 +84,7 @@ func (h *handlers) PermissionMiddleware(next echo.HandlerFunc) echo.HandlerFunc 
 			return next(c)
 		}
 
-		if !lo.Contains(resp.Roles, role) {
+		if !lo.Contains(resp.Roles, int64(role)) {
 			return echo.NewHTTPError(http.StatusForbidden, errorlist.ErrHandlerNotAllowed)
 		}
 

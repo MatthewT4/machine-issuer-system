@@ -1,7 +1,6 @@
 package jwt
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -27,8 +26,7 @@ func NewToken(user model.User, secretKey string, ttl time.Duration) (string, err
 	return tokenString, nil
 }
 
-func ParseToken(tokenString string, secretKey string) (jwt.MapClaims, error) {
-	fmt.Printf("token: %s\n", tokenString)
+func ParseToken(tokenString string, secretKey []byte) (jwt.MapClaims, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errorlist.ErrUnexpectedSigningMethod
