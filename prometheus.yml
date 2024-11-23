@@ -1,5 +1,5 @@
 global:
-  scrape_interval: 1s # Интервал сбора метрик
+  scrape_interval: 5s # Интервал сбора метрик
 
 scrape_configs:
   - job_name: 'issuer' # Имя вашего приложения
