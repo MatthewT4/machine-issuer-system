@@ -112,6 +112,22 @@ func (h *handlers) GetServer(ctx echo.Context, serverId openapi_types.UUID) erro
 	return ctx.JSON(http.StatusOK, server)
 }
 
+func (p *handlers) RebootServer(ctx echo.Context, serverId openapi_types.UUID) error {
+	err := p.core.RebootServer(
+		ctx.Request().Context(),
+		serverId,
+	)
+	return p.convertCoreErrorToResponse(err)
+}
+
+func (p *handlers) CreateUserOnVm(ctx echo.Context, serverId openapi_types.UUID) error {
+	err := p.core.CreateUserOnVm(
+		ctx.Request().Context(),
+		serverId,
+	)
+	return p.convertCoreErrorToResponse(err)
+}
+
 func (p *handlers) convertCoreErrorToResponse(err error) error {
 	if err == nil {
 		return nil
@@ -131,12 +147,4 @@ func (p *handlers) convertCoreErrorToResponse(err error) error {
 		p.logger.Error("Unknown error", slog.Any("error", err))
 		return echo.ErrInternalServerError
 	}
-}
-
-func (p *handlers) CreateUserOnVm(ctx echo.Context, serverId openapi_types.UUID) error {
-	return nil
-}
-
-func (p *handlers) RebootServer(ctx echo.Context, serverId openapi_types.UUID) error {
-	return nil
 }
