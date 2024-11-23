@@ -13,7 +13,6 @@ import (
 )
 
 type Storage interface {
-	GetProduct(ctx context.Context, productID uuid.UUID) (model.Product, error)
 	GetAvailableServers(ctx context.Context) ([]model.Server, error)
 	GetMyServers(ctx context.Context, userID uuid.UUID) ([]model.Server, error)
 	GetServer(ctx context.Context, serverID uuid.UUID) (model.Server, error)
@@ -40,17 +39,6 @@ func NewCore(storage Storage, logger *slog.Logger, cfg config.Config) *Core {
 		logger: logger,
 		cfg:    cfg,
 	}
-}
-
-func (c *Core) GetProduct(ctx context.Context, productID uuid.UUID) (model.Product, error) {
-	product, err := c.storage.GetProduct(ctx, productID)
-	if err != nil {
-		if errors.Is(err, &model.ErrNotFound{}) {
-			return model.Product{}, err
-		}
-		return model.Product{}, fmt.Errorf("get product: %w", err)
-	}
-	return product, err
 }
 
 func (c *Core) GetAvailableServers(ctx context.Context) ([]model.Server, error) {

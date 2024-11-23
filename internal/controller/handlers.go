@@ -85,25 +85,6 @@ func (p *handlers) GetMyServers(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, servers)
 }
 
-func (p *handlers) GetProduct(ctx echo.Context, productId openapi_types.UUID) error {
-	p.logger.Info("Get product request", slog.Any("productId", productId))
-
-	product, err := p.core.GetProduct(ctx.Request().Context(), productId)
-	if err != nil {
-		var errNotFound *model.ErrNotFound
-		switch {
-		case errors.As(err, &errNotFound):
-			p.logger.Debug("Product not found", slog.Any("productId", productId))
-			return echo.NewHTTPError(http.StatusNotFound, "Produвct not found")
-		default:
-			p.logger.Error("Get product unknown error", slog.Any("productId", productId), slog.Any("error", err))
-			return echo.ErrInternalServerError
-		}
-	}
-
-	return ctx.JSON(http.StatusOK, product)
-}
-
 func (p *handlers) convertCoreErrorToResponse(err error) error {
 	if err == nil {
 		return nil
