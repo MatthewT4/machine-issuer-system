@@ -183,6 +183,40 @@ paths:
           description: Server not found
         500:
           description: Internal server error
+  /reboot/{server_id}:
+    get:
+      operationId: Reboot server
+      parameters:
+        - name: server_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Successfully reboot
+        404:
+          description: Server not found
+        500:
+          description: Internal server error
+  /vmusers/add/{server_id}:
+    get:
+      operationId: Create user on vm
+      parameters:
+        - name: server_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Successfully create user role
+        404:
+          description: Server not found
+        500:
+          description: Internal server error
 
 components:
   schemas:

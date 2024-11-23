@@ -132,3 +132,11 @@ func (p *handlers) convertCoreErrorToResponse(err error) error {
 		return echo.ErrInternalServerError
 	}
 }
+
+func (p *handlers) CreateUserOnVm(ctx echo.Context, serverId openapi_types.UUID) error {
+	return nil
+}
+
+func (p *handlers) RebootServer(ctx echo.Context, serverId openapi_types.UUID) error {
+	return nil
+}
