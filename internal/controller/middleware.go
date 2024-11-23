@@ -43,7 +43,15 @@ func (h *handlers) AuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 
 		c.Set("role", role)
 
-		return next(c)
+		err = next(c)
+		resp := c.Response()
+		resp.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+		//w.Header().Set("Access-Control-Allow-Origin", "*")
+		resp.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, PATCH, DELETE")
+		resp.Header().Set("Access-Control-Allow-Headers", "*")
+		resp.Header().Set("Access-Control-Allow-Credentials", "true")
+		c.SetResponse(resp)
+		return err
 	}
 }
 
