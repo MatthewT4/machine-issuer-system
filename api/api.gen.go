@@ -68,6 +68,9 @@ type ServerInterface interface {
 	// (GET /metrics/{server_id})
 	GetServerMetrics(ctx echo.Context, serverId openapi_types.UUID) error
 
+	// (GET /reboot/{server_id})
+	RebootServer(ctx echo.Context, serverId openapi_types.UUID) error
+
 	// (DELETE /rent/{server_id})
 	UnRentServer(ctx echo.Context, serverId openapi_types.UUID) error
 
@@ -82,6 +85,9 @@ type ServerInterface interface {
 
 	// (GET /servers/{server_id})
 	GetServer(ctx echo.Context, serverId openapi_types.UUID) error
+
+	// (GET /vmusers/add/{server_id})
+	CreateUserOnVm(ctx echo.Context, serverId openapi_types.UUID) error
 }
 
 // ServerInterfaceWrapper converts echo contexts to parameters.
@@ -129,6 +135,22 @@ func (w *ServerInterfaceWrapper) GetServerMetrics(ctx echo.Context) error {
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.GetServerMetrics(ctx, serverId)
+	return err
+}
+
+// RebootServer converts echo context to params.
+func (w *ServerInterfaceWrapper) RebootServer(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "server_id" -------------
+	var serverId openapi_types.UUID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "server_id", ctx.Param("server_id"), &serverId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter server_id: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.RebootServer(ctx, serverId)
 	return err
 }
 
@@ -198,6 +220,22 @@ func (w *ServerInterfaceWrapper) GetServer(ctx echo.Context) error {
 	return err
 }
 
+// CreateUserOnVm converts echo context to params.
+func (w *ServerInterfaceWrapper) CreateUserOnVm(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "server_id" -------------
+	var serverId openapi_types.UUID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "server_id", ctx.Param("server_id"), &serverId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter server_id: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CreateUserOnVm(ctx, serverId)
+	return err
+}
+
 // This is a simple interface which specifies echo.Route addition functions which
 // are present on both echo.Echo and echo.Group, since we want to allow using
 // either of them for path registration
@@ -230,10 +268,12 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.GET(baseURL+"/auth/signout", wrapper.SignOut)
 	router.POST(baseURL+"/auth/signup", wrapper.SignUp)
 	router.GET(baseURL+"/metrics/:server_id", wrapper.GetServerMetrics)
+	router.GET(baseURL+"/reboot/:server_id", wrapper.RebootServer)
 	router.DELETE(baseURL+"/rent/:server_id", wrapper.UnRentServer)
 	router.POST(baseURL+"/rent/:server_id", wrapper.RentServer)
 	router.GET(baseURL+"/servers/available", wrapper.GetAvailableServers)
 	router.GET(baseURL+"/servers/my", wrapper.GetMyServers)
 	router.GET(baseURL+"/servers/:server_id", wrapper.GetServer)
+	router.GET(baseURL+"/vmusers/add/:server_id", wrapper.CreateUserOnVm)
 
 }
