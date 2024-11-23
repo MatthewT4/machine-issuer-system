@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"fmt"
+	"log/slog"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -13,22 +15,26 @@ import (
 
 func (h *handlers) AuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
+		log := h.logger.With(
+			slog.String("op", "AuthMiddleware"))
+
 		cookie, err := c.Cookie(h.cfg.AuthCookieName)
 		if err != nil {
-			return err
+			log.Warn("failed to get cookie: %v", err)
+
+			return next(c)
 		}
 
 		jwtToken := cookie.Value
 
 		claims, err := jwt.ParseToken(jwtToken, h.cfg.AuthSecretKey)
 		if err != nil {
-			return err
+			log.Error("failed to parse token: %v", err)
 		}
 
 		role, ok := claims["role"].(int64)
 		if !ok {
-			h.logger.Warn("no role in cookie: %+v", claims)
-			return echo.NewHTTPError(http.StatusUnauthorized, errorlist.ErrInvalidRole)
+			log.Warn("no role in cookie: %+v", claims)
 		}
 
 		c.Set("role", role)
@@ -39,15 +45,28 @@ func (h *handlers) AuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 
 func (h *handlers) PermissionMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
+		log := h.logger.With(
+			slog.String("op", "PermissionMiddleware"))
+
 		method := c.Request().Method
 		path := c.Request().URL.Path
-		role := c.Get("role").(int64)
+		ctxRole := c.Get("role")
+
+		var role int64
+		if ctxRole != nil {
+			role = ctxRole.(int64)
+		}
+
+		fmt.Println(role)
+		log.Info(fmt.Sprintf("user with role: %d", role))
 
 		resp, err := h.core.GetPermissionHandler(c.Request().Context(), model.GetPermissionHandlerRequest{
 			Method: method,
 			Path:   path,
 		})
 		if err != nil {
+			log.Error("failed to get permission: %v", err)
+
 			return err
 		}
 

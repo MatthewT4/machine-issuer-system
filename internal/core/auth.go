@@ -2,11 +2,13 @@ package core
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"golang.org/x/crypto/bcrypt"
 
 	"machineIssuerSystem/internal/model"
@@ -60,12 +62,12 @@ func (c *Core) SignIn(ctx context.Context, params model.SignInRequest) (token st
 
 	log := c.logger.With(
 		slog.String("op", op),
-		slog.String("username", params.Username),
+		slog.String("email", params.Email),
 	)
 
 	log.Info("login for user")
 
-	user, err := c.storage.GetUserByUsername(ctx, params.Username)
+	user, err := c.storage.GetUserByEmail(ctx, params.Email)
 	if err != nil {
 		log.Error("failed to fetch user", err.Error())
 
@@ -92,5 +94,10 @@ func (c *Core) GetPermissionHandler(
 	ctx context.Context,
 	params model.GetPermissionHandlerRequest,
 ) (response model.PermissionHandler, err error) {
-	return c.storage.GetPermissionHandler(ctx, params)
+	response, err = c.storage.GetPermissionHandler(ctx, params)
+	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
+		return response, err
+	}
+
+	return response, nil
 }

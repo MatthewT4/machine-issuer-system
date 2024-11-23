@@ -2,6 +2,7 @@ package controller
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"time"
@@ -12,6 +13,8 @@ import (
 )
 
 func (h *handlers) SignUp(ctx echo.Context) error {
+	h.logger.Info("SignUp")
+	fmt.Printf("ldskfjosidjf")
 	body, err := io.ReadAll(ctx.Request().Body)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())

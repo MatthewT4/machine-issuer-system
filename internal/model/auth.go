@@ -1,18 +1,14 @@
 package model
 
 type SignUpRequest struct {
-	Username string `json:"name"`
+	Username string `json:"username"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
 type SignInRequest struct {
-	Username string `json:"username"`
+	Email    string `json:"email"`
 	Password string `json:"password"`
-}
-
-type SignOutRequest struct {
-	Username string `json:"username"`
 }
 
 type GetPermissionHandlerRequest struct {

@@ -21,7 +21,7 @@ type Storage interface {
 	UnRentServer(ctx context.Context, serverID uuid.UUID) error
 
 	CreateUser(ctx context.Context, user model.User) (result model.User, err error)
-	GetUserByUsername(ctx context.Context, username string) (model.User, error)
+	GetUserByEmail(ctx context.Context, email string) (model.User, error)
 
 	GetPermissionHandler(ctx context.Context, params model.GetPermissionHandlerRequest) (model.PermissionHandler, error)
 }

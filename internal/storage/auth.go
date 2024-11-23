@@ -24,13 +24,13 @@ func (p *PgStorage) CreateUser(ctx context.Context, user model.User) (result mod
 	return result, nil
 }
 
-func (p *PgStorage) GetUserByUsername(ctx context.Context, username string) (result model.User, err error) {
+func (p *PgStorage) GetUserByEmail(ctx context.Context, email string) (result model.User, err error) {
 	const op = "storage.GetUserByUsername"
 
 	err = p.connections.QueryRow(
 		ctx,
 		queryGetUserByUsername,
-		username,
+		email,
 	).Scan(&result)
 	if err != nil {
 		return result, fmt.Errorf("%s: %w", op, err)
