@@ -18,10 +18,10 @@ const (
 )
 
 type Metrics struct {
-	uptime int64
-	cpu    float64
-	ram    float64
-	mem    int64 //mb
+	Uptime int64
+	CPU    float64
+	RAM    float64
+	MEM    int64 //mb
 }
 
 func publicKeyFile(file string) (ssh.AuthMethod, error) {
@@ -37,7 +37,7 @@ func publicKeyFile(file string) (ssh.AuthMethod, error) {
 	return ssh.PublicKeys(publicKey), nil
 }
 
-func createConnection(ip string) (*ssh.Session, error) {
+func CreateConnection(ip string) (*ssh.Session, error) {
 	publicKey, err := publicKeyFile(filePath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get ssh public key: %w", err)
@@ -76,15 +76,15 @@ func parseAnswer(ans string) Metrics {
 	ram, _ := strconv.ParseFloat(result[2], 2)
 	mem, _ := strconv.ParseInt(result[3], 10, 32)
 	metrics := Metrics{
-		uptime: time.Now().Unix() - uptime.Unix(),
-		cpu:    cpu,
-		ram:    ram,
-		mem:    mem,
+		Uptime: time.Now().Unix() - uptime.Unix(),
+		CPU:    cpu,
+		RAM:    ram,
+		MEM:    mem,
 	}
 	return metrics
 }
 
-func requestAndProcessMetrics(session *ssh.Session) (Metrics, error) {
+func RequestAndProcessMetrics(session *ssh.Session) (Metrics, error) {
 	commands := []string{
 		"uptime -s", //time
 		"top -bn1 | grep \"Cpu(s)\" | sed \"s/.*, *\\([0-9.]*\\)%* id.*/\\1/\" | awk '{print 100 - $1}'", //CPU
@@ -103,17 +103,4 @@ func requestAndProcessMetrics(session *ssh.Session) (Metrics, error) {
 	}
 	ans := parseAnswer(stdout.String())
 	return ans, nil
-}
-
-func GetMetrics(ip string) {
-	session, err := createConnection(ip)
-	if err != nil {
-		panic(err)
-	}
-	defer session.Close()
-	metrics, err := requestAndProcessMetrics(session)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(metrics.uptime, metrics.cpu, metrics.ram, metrics.mem)
 }

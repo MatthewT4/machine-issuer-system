@@ -4,10 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
 	"log/slog"
 	"machineIssuerSystem/internal/model"
+
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 )
 
 func (p *PgStorage) GetAvailableServers(ctx context.Context) ([]model.Server, error) {
@@ -89,4 +90,23 @@ func (p *PgStorage) UnRentServer(ctx context.Context, serverID uuid.UUID) error 
 	p.logger.Info("UnRentServer", slog.Int64("count_updated", res.RowsAffected()))
 
 	return nil
+}
+
+func (p *PgStorage) GetServerIp(ctx context.Context, serverID uuid.UUID) (string, error) {
+	sql := "SELECT ip FROM servers WHERE id = $1"
+
+	rows, err := p.connections.Query(ctx, sql, serverID)
+	if err != nil {
+		return "", fmt.Errorf("queryex: %w", err)
+	}
+	ip, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[string])
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return "", &model.ErrNotFound{}
+		}
+
+		return "", err
+	}
+
+	return ip, nil
 }

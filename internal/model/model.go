@@ -17,4 +17,5 @@ type Server struct {
 	Memory int
 	Disk   int
 	RentBy *uuid.UUID
+	IP     string
 }
