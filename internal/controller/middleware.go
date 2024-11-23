@@ -61,6 +61,10 @@ func (h *handlers) PermissionMiddleware(next echo.HandlerFunc) echo.HandlerFunc 
 		path := c.Request().URL.Path
 		log.Info("params", method, path)
 
+		if len(path) >= 5 && string(path[:5]) == "/auth" {
+			return next(c)
+		}
+
 		ctxRole := c.Get("role")
 		ctxID := c.Get("id")
 

@@ -10,7 +10,7 @@ RETURNING id, username, email, password, role, created_at, updated_at
 	queryGetUserByUsername = `
 SELECT id, email, username, password, role, created_at, updated_at 
 FROM users
-WHERE email = $1
+WHERE username = $1
 `
 
 	queryGetPermissionHandler = `

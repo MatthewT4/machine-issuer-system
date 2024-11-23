@@ -7,10 +7,10 @@ import (
 )
 
 type User struct {
-	UUID         uuid.UUID
+	UUID         uuid.UUID `db:"id" json:"uuid"`
 	Email        string
 	Username     string
-	HashPassword string
+	HashPassword string `db:"password"`
 	Role         int64
 	CreatedAt    time.Time
 	UpdatedAt    *time.Time

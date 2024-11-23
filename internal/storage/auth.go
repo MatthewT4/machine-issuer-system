@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 	"fmt"
+	"github.com/jackc/pgx/v5"
 
 	"machineIssuerSystem/internal/model"
 )
@@ -26,19 +27,23 @@ func (p *PgStorage) CreateUser(ctx context.Context, user model.User) (result mod
 	return result, nil
 }
 
-func (p *PgStorage) GetUserByEmail(ctx context.Context, email string) (result model.User, err error) {
+func (p *PgStorage) GetUserByUsername(ctx context.Context, username string) (model.User, error) {
 	const op = "storage.GetUserByUsername"
 
-	err = p.connections.QueryRow(
+	rows, err := p.connections.Query(
 		ctx,
 		queryGetUserByUsername,
-		email,
-	).Scan(&result)
+		username,
+	)
 	if err != nil {
-		return result, fmt.Errorf("%s: %w", op, err)
+		return model.User{}, fmt.Errorf("%s: %w", op, err)
+	}
+	user, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[model.User])
+	if err != nil {
+		return model.User{}, fmt.Errorf("%s: %w", op, err)
 	}
 
-	return result, nil
+	return user, nil
 }
 
 func (p *PgStorage) GetPermissionHandler(

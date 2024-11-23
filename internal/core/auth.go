@@ -61,15 +61,19 @@ func (c *Core) SignUp(ctx context.Context, params model.SignUpRequest) (token st
 
 func (c *Core) SignIn(ctx context.Context, params model.SignInRequest) (token string, err error) {
 	const op = "authCore.SignIn"
-
+	ff, err := bcrypt.GenerateFromPassword([]byte(params.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return "", err
+	}
+	fmt.Println(string(ff))
 	log := c.logger.With(
 		slog.String("op", op),
-		slog.String("email", params.Email),
+		slog.String("username", params.Username),
 	)
 
 	log.Info("login for user")
 
-	user, err := c.storage.GetUserByEmail(ctx, params.Email)
+	user, err := c.storage.GetUserByUsername(ctx, params.Username)
 	if err != nil {
 		log.Error("failed to fetch user", err.Error())
 
