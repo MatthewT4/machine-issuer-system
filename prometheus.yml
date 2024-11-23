@@ -1,0 +1,7 @@
+global:
+  scrape_interval: 1s # Интервал сбора метрик
+
+scrape_configs:
+  - job_name: 'issuer' # Имя вашего приложения
+    static_configs:
+      - targets: ['host.docker.internal'] # Замена на ваш сервис с метриками

@@ -35,7 +35,8 @@ VALUES ('POST', '/auth/signup', '{0, 1, 2, 3}'),
        ('GET', '/servers/my', '{1, 2, 3}'),
        ('POST', '/rent/%', '{1, 2, 3}'),
        ('DELETE', '/rent/%', '{1, 2, 3}'),
-       ('GET', '/metrics/%', '{1, 2, 3}');
+       ('GET', '/metrics/%', '{1, 2, 3}'),
+       ('GET', '/metrics', '{0, 1, 2, 3}');
 
 INSERT INTO public.servers (id, title, cpu, memory, disk, rent_by, ip)
 VALUES ('4f45b109-0e26-43b0-abcb-52b216b69a1e', 'q222', 12, 8192, 16000, null, '51.250.41.219');

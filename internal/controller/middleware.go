@@ -37,9 +37,16 @@ func (h *handlers) AuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 			log.Warn("no role in claims: %+v", claims)
 		}
 
+		id, ok := claims["id"].(string)
+		if !ok {
+			log.Warn("no id in claims: %+v", claims)
+		}
+
 		log.Info("setting role", role)
+		log.Info("setting id", id)
 
 		c.Set("role", role)
+		c.Set("id", id)
 
 		err = next(c)
 		resp := c.Response()
@@ -60,21 +67,28 @@ func (h *handlers) PermissionMiddleware(next echo.HandlerFunc) echo.HandlerFunc 
 
 		method := c.Request().Method
 		path := c.Request().URL.Path
-		ctxRole := c.Get("role")
 		log.Info("params", method, path)
 
+		ctxRole := c.Get("role")
+		ctxID := c.Get("id")
+
 		var role float64
+		var id string
+
 		if ctxRole != nil {
 			role = ctxRole.(float64)
 		}
 
-		log.Info(fmt.Sprintf("user with role: %d", role))
+		if ctxID != nil {
+			id = ctxID.(string)
+		}
+
+		log.Info(fmt.Sprintf("user with role: %f, id: %s", role, id))
 
 		resp, err := h.core.GetPermissionHandler(c.Request().Context(), model.GetPermissionHandlerRequest{
 			Method: method,
 			Path:   path,
 		})
-		fmt.Printf("resp, err: %+v, %s\n", resp, err)
 		if err != nil {
 			log.Error("failed to get permission: %v", err)
 
