@@ -34,6 +34,7 @@ type SignInJSONBody struct {
 
 // SignUpJSONBody defines parameters for SignUp.
 type SignUpJSONBody struct {
+	Email    *string `json:"email,omitempty"`
 	Password *string `json:"password,omitempty"`
 	Username *string `json:"username,omitempty"`
 }
