@@ -144,3 +144,8 @@ func (c *Core) GetMetrics(ctx context.Context, serverID uuid.UUID) (response mod
 
 	return model.FromPkgToDomain(metrics), nil
 }
+
+func (c *Core) GetServer(ctx context.Context, serverID uuid.UUID) (model.Server, error) {
+	server, err := c.storage.GetServer(ctx, serverID)
+	return server, err
+}

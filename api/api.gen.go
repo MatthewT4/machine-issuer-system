@@ -79,6 +79,9 @@ type ServerInterface interface {
 
 	// (GET /servers/my)
 	GetMyServers(ctx echo.Context) error
+
+	// (GET /servers/{server_id})
+	GetServer(ctx echo.Context, serverId openapi_types.UUID) error
 }
 
 // ServerInterfaceWrapper converts echo contexts to parameters.
@@ -179,6 +182,22 @@ func (w *ServerInterfaceWrapper) GetMyServers(ctx echo.Context) error {
 	return err
 }
 
+// GetServer converts echo context to params.
+func (w *ServerInterfaceWrapper) GetServer(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "server_id" -------------
+	var serverId openapi_types.UUID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "server_id", ctx.Param("server_id"), &serverId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter server_id: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetServer(ctx, serverId)
+	return err
+}
+
 // This is a simple interface which specifies echo.Route addition functions which
 // are present on both echo.Echo and echo.Group, since we want to allow using
 // either of them for path registration
@@ -215,5 +234,6 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.POST(baseURL+"/rent/:server_id", wrapper.RentServer)
 	router.GET(baseURL+"/servers/available", wrapper.GetAvailableServers)
 	router.GET(baseURL+"/servers/my", wrapper.GetMyServers)
+	router.GET(baseURL+"/servers/:server_id", wrapper.GetServer)
 
 }

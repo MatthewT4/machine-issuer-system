@@ -102,6 +102,16 @@ func (p *handlers) GetServerMetrics(ctx echo.Context, serverId openapi_types.UUI
 	return ctx.JSON(http.StatusOK, metrics)
 }
 
+func (h *handlers) GetServer(ctx echo.Context, serverId openapi_types.UUID) error {
+	h.logger.Debug("handle GetServer", slog.Any("server_id", serverId))
+
+	server, err := h.core.GetServer(ctx.Request().Context(), serverId)
+	if err != nil {
+		return h.convertCoreErrorToResponse(err)
+	}
+	return ctx.JSON(http.StatusOK, server)
+}
+
 func (p *handlers) convertCoreErrorToResponse(err error) error {
 	if err == nil {
 		return nil
