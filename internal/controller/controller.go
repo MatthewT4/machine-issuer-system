@@ -2,6 +2,8 @@ package controller
 
 import (
 	"fmt"
+	"github.com/labstack/echo/v4/middleware"
+	"net/http"
 
 	"log/slog"
 
@@ -22,12 +24,17 @@ type Controller struct {
 func NewController(core *core.Core, port uint16, logger *slog.Logger, cfg config.Config) *Controller {
 	e := echo.New()
 
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins:     []string{"http://localhost:4200"}, // Замените на разрешённые домены
+		AllowMethods:     []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete, http.MethodOptions, http.MethodOptions},
+		AllowHeaders:     []string{"Refer", echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
+		AllowCredentials: true,
+	}))
 	productHandlers := newHandlers(core, logger, cfg)
 	api.RegisterHandlers(e, productHandlers)
 
-	e.Use(productHandlers.AuthMiddleware)
-	e.Use(productHandlers.PermissionMiddleware)
-
+	//e.Use(productHandlers.AuthMiddleware)
+	//e.Use(productHandlers.PermissionMiddleware)
 	return &Controller{
 		core:   core,
 		server: e,
