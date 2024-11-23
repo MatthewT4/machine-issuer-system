@@ -74,7 +74,7 @@ func CreateConnection(ip string, filePath string) (*ssh.Session, error) {
 	return session, nil
 }
 
-func parseAnswer(ans string) Metrics {
+func parseMetricsAnswer(ans string) Metrics {
 	ans = strings.TrimSpace(ans)
 	lines := strings.Split(ans, "\n")
 	var result []string
@@ -97,13 +97,7 @@ func parseAnswer(ans string) Metrics {
 	return metrics
 }
 
-func RequestAndProcessMetrics(session *ssh.Session) (Metrics, error) {
-	commands := []string{
-		"uptime -s", //time
-		"top -bn1 | grep \"Cpu(s)\" | sed \"s/.*, *\\([0-9.]*\\)%* id.*/\\1/\" | awk '{print 100 - $1}'", //CPU
-		"free | awk 'NR==2{printf \"%.2f\", $3*100/$2 }'; echo",                                          //RAM
-		"df -m / | awk 'NR==2{print $4}'",                                                                //MEM
-	}
+func GetMetrics(session *ssh.Session, commands []string) (Metrics, error) {
 	script := ""
 	for _, cmd := range commands {
 		script += cmd + "\n"
@@ -112,8 +106,22 @@ func RequestAndProcessMetrics(session *ssh.Session) (Metrics, error) {
 	session.Stdout = &stdout
 	err := session.Run(script)
 	if err != nil {
-		panic(fmt.Errorf("failed to execute script: %w", err))
+		return Metrics{}, fmt.Errorf("failed to execute script: %w", err)
 	}
-	ans := parseAnswer(stdout.String())
+	ans := parseMetricsAnswer(stdout.String())
 	return ans, nil
+}
+
+func ExecuteCommandsOnVirtualMachine(session *ssh.Session, commands []string) error {
+	script := ""
+	for _, cmd := range commands {
+		script += cmd + "\n"
+	}
+	var stdout bytes.Buffer
+	session.Stdout = &stdout
+	err := session.Run(script)
+	if err != nil {
+		return fmt.Errorf("failed to execute script: %w", err)
+	}
+	return nil
 }
