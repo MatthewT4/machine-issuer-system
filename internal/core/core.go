@@ -135,7 +135,10 @@ func (c *Core) GetMetrics(ctx context.Context, serverID uuid.UUID) (response mod
 	}
 	defer session.Close()
 
-	metrics, err := vm.RequestAndProcessMetrics(session)
+	metrics, err := vm.GetMetrics(
+		session,
+		[]string{vm.Uptime, vm.CPU, vm.RAM, vm.MEM},
+	)
 	if err != nil {
 		log.Error("failed to request metrics", err)
 
