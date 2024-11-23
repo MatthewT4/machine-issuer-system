@@ -68,6 +68,23 @@ func (p *handlers) GetAvailableServers(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, servers)
 }
 
+func (p *handlers) GetMyServers(ctx echo.Context) error {
+	reqUserID := userID
+	servers, err := p.core.GetMyServers(ctx.Request().Context(), reqUserID)
+	if err != nil {
+		var errNotFound *model.ErrNotFound
+		switch {
+		case errors.As(err, &errNotFound):
+			p.logger.Debug("servers not found")
+			return echo.NewHTTPError(http.StatusNotFound, "Servers not found")
+		default:
+			p.logger.Error("GetAvailableServers unknown error", slog.Any("error", err))
+			return echo.ErrInternalServerError
+		}
+	}
+	return ctx.JSON(http.StatusOK, servers)
+}
+
 func (p *handlers) GetProduct(ctx echo.Context, productId openapi_types.UUID) error {
 	p.logger.Info("Get product request", slog.Any("productId", productId))
 

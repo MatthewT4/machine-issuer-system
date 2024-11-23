@@ -15,15 +15,15 @@ import (
 // Server defines model for Server.
 type Server struct {
 	// Cpu core
-	Cpu *interface{} `json:"cpu,omitempty"`
+	Cpu *int `json:"cpu,omitempty"`
 
 	// Disk MB
-	Disk *interface{}        `json:"disk,omitempty"`
+	Disk *int                `json:"disk,omitempty"`
 	Id   *openapi_types.UUID `json:"id,omitempty"`
 
 	// Memory MB
-	Memory *interface{} `json:"memory,omitempty"`
-	Title  *string      `json:"title,omitempty"`
+	Memory *int    `json:"memory,omitempty"`
+	Title  *string `json:"title,omitempty"`
 }
 
 // SignInJSONBody defines parameters for SignIn.
@@ -65,6 +65,9 @@ type ServerInterface interface {
 
 	// (GET /servers/available)
 	GetAvailableServers(ctx echo.Context) error
+
+	// (GET /servers/my)
+	GetMyServers(ctx echo.Context) error
 }
 
 // ServerInterfaceWrapper converts echo contexts to parameters.
@@ -140,6 +143,15 @@ func (w *ServerInterfaceWrapper) GetAvailableServers(ctx echo.Context) error {
 	return err
 }
 
+// GetMyServers converts echo context to params.
+func (w *ServerInterfaceWrapper) GetMyServers(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetMyServers(ctx)
+	return err
+}
+
 // This is a simple interface which specifies echo.Route addition functions which
 // are present on both echo.Echo and echo.Group, since we want to allow using
 // either of them for path registration
@@ -174,5 +186,6 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.DELETE(baseURL+"/rent/:server_id", wrapper.UnRentServer)
 	router.POST(baseURL+"/rent/:server_id", wrapper.RentServer)
 	router.GET(baseURL+"/servers/available", wrapper.GetAvailableServers)
+	router.GET(baseURL+"/servers/my", wrapper.GetMyServers)
 
 }

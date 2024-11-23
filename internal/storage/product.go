@@ -48,6 +48,25 @@ func (p *PgStorage) GetAvailableServers(ctx context.Context) ([]model.Server, er
 	return servers, nil
 }
 
+func (p *PgStorage) GetMyServers(ctx context.Context, userID uuid.UUID) ([]model.Server, error) {
+	sql := "SELECT * FROM servers WHERE rent_by = $1"
+
+	rows, err := p.connections.Query(ctx, sql, userID)
+	if err != nil {
+		return nil, fmt.Errorf("queryex: %w", err)
+	}
+	servers, err := pgx.CollectRows(rows, pgx.RowToStructByName[model.Server])
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, &model.ErrNotFound{}
+		}
+
+		return nil, err
+	}
+
+	return servers, nil
+}
+
 func (p *PgStorage) GetServer(ctx context.Context, serverID uuid.UUID) (model.Server, error) {
 	sql := "SELECT * FROM servers WHERE id = $1"
 

@@ -15,6 +15,7 @@ import (
 type Storage interface {
 	GetProduct(ctx context.Context, productID uuid.UUID) (model.Product, error)
 	GetAvailableServers(ctx context.Context) ([]model.Server, error)
+	GetMyServers(ctx context.Context, userID uuid.UUID) ([]model.Server, error)
 	GetServer(ctx context.Context, serverID uuid.UUID) (model.Server, error)
 	RentServer(ctx context.Context, serverID uuid.UUID, userID uuid.UUID) error
 	UnRentServer(ctx context.Context, serverID uuid.UUID) error
@@ -59,6 +60,17 @@ func (c *Core) GetAvailableServers(ctx context.Context) ([]model.Server, error) 
 			return nil, err
 		}
 		return nil, fmt.Errorf("GetAvailableServers from db: %w", err)
+	}
+	return servers, err
+}
+
+func (c *Core) GetMyServers(ctx context.Context, userID uuid.UUID) ([]model.Server, error) {
+	servers, err := c.storage.GetMyServers(ctx, userID)
+	if err != nil {
+		if errors.Is(err, &model.ErrNotFound{}) {
+			return nil, err
+		}
+		return nil, fmt.Errorf("GetMyServers from db: %w", err)
 	}
 	return servers, err
 }
