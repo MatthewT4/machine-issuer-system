@@ -111,21 +111,34 @@ func (c *Core) UnRentServer(ctx context.Context, serverID uuid.UUID) error {
 	return nil
 }
 
-func (c *Core) GetMetrics(ctx context.Context, serverID uuid.UUID) error {
+func (c *Core) GetMetrics(ctx context.Context, serverID uuid.UUID) (response model.Metric, err error) {
+	log := c.logger.With(
+		slog.String("op", "core.GetMetrics"),
+		slog.String("server_id", serverID.String()))
+
 	ip, err := c.storage.GetServerIp(ctx, serverID)
 	if err != nil {
-		return &model.ErrBadRequest{}
+		if errors.Is(err, &model.ErrNotFound{}) {
+			return response, &model.ErrNotFound{}
+		}
+
+		return response, err
 	}
+
 	session, err := vm.CreateConnection(ip)
 	if err != nil {
-		panic(err)
+		log.Error("failed to create connection", err)
+
+		return response, err
 	}
 	defer session.Close()
+
 	metrics, err := vm.RequestAndProcessMetrics(session)
 	if err != nil {
-		panic(err)
-	}
-	fmt.Println(metrics.Uptime, metrics.CPU, metrics.RAM, metrics.MEM)
+		log.Error("failed to request metrics", err)
 
-	return nil
+		return response, err
+	}
+
+	return model.FromPkgToDomain(metrics), nil
 }

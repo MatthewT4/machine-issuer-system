@@ -52,7 +52,7 @@ func (p *PgStorage) GetPermissionHandler(
 		queryGetPermissionHandler,
 		params.Method,
 		params.Path,
-	).Scan(&result)
+	).Scan(&result.ID, &result.Method, &result.Path, &result.Roles)
 	if err != nil {
 		return result, fmt.Errorf("%s: %w", op, err)
 	}

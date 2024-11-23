@@ -85,6 +85,23 @@ func (p *handlers) GetMyServers(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, servers)
 }
 
+func (p *handlers) GetServerMetrics(ctx echo.Context, serverId openapi_types.UUID) error {
+	metrics, err := p.core.GetMetrics(ctx.Request().Context(), serverId)
+	if err != nil {
+		var errNotFound *model.ErrNotFound
+		switch {
+		case errors.As(err, &errNotFound):
+			p.logger.Debug("server not found")
+			return echo.NewHTTPError(http.StatusNotFound, "Server not found")
+		default:
+			p.logger.Error("GetServerMetrics unknown error", slog.Any("error", err))
+			return echo.ErrInternalServerError
+		}
+	}
+
+	return ctx.JSON(http.StatusOK, metrics)
+}
+
 func (p *handlers) convertCoreErrorToResponse(err error) error {
 	if err == nil {
 		return nil

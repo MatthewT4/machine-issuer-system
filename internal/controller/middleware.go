@@ -73,15 +73,11 @@ func (h *handlers) PermissionMiddleware(next echo.HandlerFunc) echo.HandlerFunc 
 			Method: method,
 			Path:   path,
 		})
+		fmt.Printf("resp, err: %+v, %s\n", resp, err)
 		if err != nil {
 			log.Error("failed to get permission: %v", err)
 
 			return err
-		}
-
-		// handler is public if no roles added
-		if len(resp.Roles) == 0 {
-			return next(c)
 		}
 
 		if !lo.Contains(resp.Roles, int64(role)) {

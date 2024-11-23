@@ -144,6 +144,28 @@ paths:
         404:
           description: Server not found
 
+  /metrics/{server_id}:
+    get:
+      operationId: GetServerMetrics
+      parameters:
+        - name: server_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Return metrics of server
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Metric"
+        404:
+          description: Server not found
+        500:
+          description: Internal server error
+
 components:
   schemas:
     Server:
@@ -171,3 +193,14 @@ components:
           format: uuid
         name:
           type: string
+    Metric:
+      type: object
+      properties:
+        uptime:
+          type: integer
+        cpu:
+          type: string
+        ram:
+          type: string
+        mem:
+          type: integer
