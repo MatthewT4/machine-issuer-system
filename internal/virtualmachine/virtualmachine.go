@@ -11,8 +11,6 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-// в апи - ручка по id сервера отдаст метрику
-
 const (
 	filePath   = "/Users/mixalight/.ssh/id_ed25519" //change on another vm
 	port       = "22"
@@ -108,7 +106,6 @@ func requestAndProcessMetrics(session *ssh.Session) (Metrics, error) {
 }
 
 func GetMetrics(ip string) {
-	//ip := "51.250.41.219"
 	session, err := createConnection(ip)
 	if err != nil {
 		panic(err)
