@@ -14,6 +14,7 @@ import (
 const (
 	port       = "22"
 	passPhrase = "cloud" //remove if another vm
+	loginPass  = "5625bf05e16df92105b9ada132add04a"
 )
 
 type Metrics struct {
@@ -41,6 +42,7 @@ func CreateConnection(ip string, filePath string) (*ssh.Session, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to get ssh public key: %w", err)
 	}
+
 	config := &ssh.ClientConfig{
 		User: "mixalight",
 		Auth: []ssh.AuthMethod{
@@ -50,8 +52,20 @@ func CreateConnection(ip string, filePath string) (*ssh.Session, error) {
 	}
 	conn, err := ssh.Dial("tcp", ip+":"+port, config)
 	if err != nil {
-		return nil, fmt.Errorf("failed to connect: %w", err)
+		config := &ssh.ClientConfig{
+			User: "root",
+			Auth: []ssh.AuthMethod{
+				ssh.Password(loginPass),
+			},
+			HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+		}
+
+		conn, err = ssh.Dial("tcp", ip+":"+port, config)
+		if err != nil {
+			return nil, fmt.Errorf("failed to connect: %w", err)
+		}
 	}
+
 	session, err := conn.NewSession()
 	if err != nil {
 		return nil, fmt.Errorf("failed to create session: %s", err)
