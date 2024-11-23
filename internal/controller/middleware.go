@@ -32,10 +32,14 @@ func (h *handlers) AuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 			log.Error("failed to parse token: %v", err)
 		}
 
+		fmt.Printf("claims: %+v\n", claims)
+
 		role, ok := claims["role"].(int64)
 		if !ok {
 			log.Warn("no role in cookie: %+v", claims)
 		}
+
+		log.Info("setting role: %d", role)
 
 		c.Set("role", role)
 
@@ -57,7 +61,6 @@ func (h *handlers) PermissionMiddleware(next echo.HandlerFunc) echo.HandlerFunc 
 			role = ctxRole.(int64)
 		}
 
-		fmt.Println(role)
 		log.Info(fmt.Sprintf("user with role: %d", role))
 
 		resp, err := h.core.GetPermissionHandler(c.Request().Context(), model.GetPermissionHandlerRequest{

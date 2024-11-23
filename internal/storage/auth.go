@@ -14,10 +14,11 @@ func (p *PgStorage) CreateUser(ctx context.Context, user model.User) (result mod
 		ctx,
 		queryCreateUser,
 		user.UUID,
-		user.Username,
 		user.Email,
+		user.Username,
 		user.HashPassword,
-	).Scan(&result.UUID, &result.Username, &result.Email, &result.HashPassword, &result.CreatedAt, &result.UpdatedAt)
+		user.Role,
+	).Scan(&result.UUID, &result.Username, &result.Email, &result.HashPassword, &result.Role, &result.CreatedAt, &result.UpdatedAt)
 	if err != nil {
 		return result, fmt.Errorf("%s: %w", op, err)
 	}

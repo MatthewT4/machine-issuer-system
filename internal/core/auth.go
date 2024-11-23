@@ -47,6 +47,8 @@ func (c *Core) SignUp(ctx context.Context, params model.SignUpRequest) (token st
 		return token, err
 	}
 
+	log.Info("successfully created user", user)
+
 	token, err = jwt.NewToken(user, c.cfg.AuthSecretKey, time.Duration(c.cfg.AuthTTL)*time.Hour)
 	if err != nil {
 		log.Error("failed to generate token", err.Error())

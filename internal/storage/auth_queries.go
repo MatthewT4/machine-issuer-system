@@ -2,9 +2,9 @@ package storage
 
 const (
 	queryCreateUser = `
-INSERT INTO users (id, email, username, password, created_at)
-VALUES ($1, $2, $3, $4, NOW())
-RETURNING id, username, email, password, created_at, updated_at
+INSERT INTO users (id, email, username, password, role, created_at)
+VALUES ($1, $2, $3, $4, $5, NOW())
+RETURNING id, username, email, password, role, created_at, updated_at
 `
 
 	queryGetUserByUsername = `
