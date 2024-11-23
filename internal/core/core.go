@@ -2,9 +2,12 @@ package core
 
 import (
 	"context"
+	"crypto/rand"
 	"errors"
 	"fmt"
 	"log/slog"
+	"math/big"
+	"strings"
 
 	"github.com/google/uuid"
 
@@ -115,40 +118,111 @@ func (c *Core) GetMetrics(ctx context.Context, serverID uuid.UUID) (response mod
 	log := c.logger.With(
 		slog.String("op", "core.GetMetrics"),
 		slog.String("server_id", serverID.String()))
-
 	ip, err := c.storage.GetServerIp(ctx, serverID)
 	if err != nil {
 		if errors.Is(err, &model.ErrNotFound{}) {
 			return response, &model.ErrNotFound{}
 		}
-
 		return response, err
 	}
-
 	log.Info("ip", ip)
-
 	session, err := vm.CreateConnection(ip, c.cfg.SSHFilePath)
 	if err != nil {
 		log.Error("failed to create connection", err)
-
 		return response, err
 	}
 	defer session.Close()
-
 	metrics, err := vm.GetMetrics(
 		session,
 		[]string{vm.Uptime, vm.CPU, vm.RAM, vm.MEM},
 	)
 	if err != nil {
 		log.Error("failed to request metrics", err)
-
 		return response, err
 	}
-
 	return model.FromPkgToDomain(metrics), nil
 }
 
 func (c *Core) GetServer(ctx context.Context, serverID uuid.UUID) (model.Server, error) {
 	server, err := c.storage.GetServer(ctx, serverID)
 	return server, err
+}
+
+func (c *Core) RebootServer(ctx context.Context, serverID uuid.UUID) error {
+	log := c.logger.With(
+		slog.String("op", "core.GetMetrics"),
+		slog.String("server_id", serverID.String()))
+	ip, err := c.storage.GetServerIp(ctx, serverID)
+	if err != nil {
+		if errors.Is(err, &model.ErrNotFound{}) {
+			return &model.ErrNotFound{}
+		}
+		return err
+	}
+	log.Info("ip", ip)
+	session, err := vm.CreateConnection(ip, c.cfg.SSHFilePath)
+	if err != nil {
+		log.Error("failed to create connection", err)
+		return err
+	}
+	defer session.Close()
+	commands := []string{vm.Reboot}
+	err = vm.ExecuteCommandsOnVirtualMachine(session, commands)
+	if err != nil {
+		log.Error("failed to execute commands on virtual machine", err)
+		return err
+	}
+	return nil
+}
+
+func (c *Core) CreateUserOnVm(ctx context.Context, serverID uuid.UUID) error {
+	log := c.logger.With(
+		slog.String("op", "core.GetMetrics"),
+		slog.String("server_id", serverID.String()))
+	ip, err := c.storage.GetServerIp(ctx, serverID)
+	if err != nil {
+		if errors.Is(err, &model.ErrNotFound{}) {
+			return &model.ErrNotFound{}
+		}
+		return err
+	}
+	log.Info("ip", ip)
+	session, err := vm.CreateConnection(ip, c.cfg.SSHFilePath)
+	if err != nil {
+		log.Error("failed to create connection", err)
+		return err
+	}
+	defer session.Close()
+	login := "user"
+	password, err := generatePassword(10)
+	if err != nil {
+		log.Error("failed to generate password for vm user", err)
+		return err
+	}
+	createUserCommands := []string{
+		fmt.Sprintf(vm.CreateUser, login),
+		fmt.Sprintf(vm.CreatePassword, password),
+		fmt.Sprintf(vm.GiveRoot, login),
+	}
+	limitRootCommands := strings.Split(strings.TrimSpace(strings.ReplaceAll(vm.LimitRoot, "%s", "user")), "\n")
+	commands := append(createUserCommands, limitRootCommands...)
+	err = vm.ExecuteCommandsOnVirtualMachine(session, commands)
+	if err != nil {
+		log.Error("failed to execute commands on virtual machine", err)
+		return err
+	}
+	return nil
+}
+
+func generatePassword(passwordLength int) (string, error) {
+	allowedChars := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+[]{}|;:,.<>?"
+	password := make([]byte, passwordLength)
+	for i := 0; i < passwordLength; i++ {
+		index, err := rand.Int(rand.Reader, big.NewInt(int64(len(allowedChars))))
+		if err != nil {
+			return "", err
+		}
+		password[i] = allowedChars[index.Int64()]
+	}
+	return string(password), nil
 }
