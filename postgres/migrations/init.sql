@@ -5,7 +5,8 @@ CREATE TABLE servers
     cpu integer NOT NULL,
     memory integer NOT null,
     disk integer not null,
-    rent_by UUID
+    rent_by UUID,
+    ip string NOT NULL
 );
 
 CREATE TABLE users

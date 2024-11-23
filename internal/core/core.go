@@ -10,6 +10,7 @@ import (
 
 	"machineIssuerSystem/internal/config"
 	"machineIssuerSystem/internal/model"
+	vm "machineIssuerSystem/internal/virtualmachine"
 )
 
 type Storage interface {
@@ -23,6 +24,8 @@ type Storage interface {
 	GetUserByEmail(ctx context.Context, email string) (model.User, error)
 
 	GetPermissionHandler(ctx context.Context, params model.GetPermissionHandlerRequest) (model.PermissionHandler, error)
+
+	GetServerIp(ctx context.Context, serverID uuid.UUID) (string, error)
 }
 
 type Core struct {
@@ -105,5 +108,24 @@ func (c *Core) UnRentServer(ctx context.Context, serverID uuid.UUID) error {
 		c.logger.Error("unrent fail", slog.Any("server", server), slog.Any("error", err))
 	}
 	c.logger.Debug("unrent ok", slog.Any("server", server))
+	return nil
+}
+
+func (c *Core) GetMetrics(ctx context.Context, serverID uuid.UUID) error {
+	ip, err := c.storage.GetServerIp(ctx, serverID)
+	if err != nil {
+		return &model.ErrBadRequest{}
+	}
+	session, err := vm.CreateConnection(ip)
+	if err != nil {
+		panic(err)
+	}
+	defer session.Close()
+	metrics, err := vm.RequestAndProcessMetrics(session)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(metrics.Uptime, metrics.CPU, metrics.RAM, metrics.MEM)
+
 	return nil
 }
