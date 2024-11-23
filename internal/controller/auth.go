@@ -28,9 +28,9 @@ func (h *handlers) SignUp(ctx echo.Context) error {
 	}
 
 	ctx.SetCookie(&http.Cookie{
-		Name:    h.cfg.Auth.CookieName,
+		Name:    h.cfg.AuthCookieName,
 		Value:   token,
-		Expires: time.Now().Add(time.Duration(h.cfg.Auth.TTL) * time.Hour),
+		Expires: time.Now().Add(time.Duration(h.cfg.AuthTTL) * time.Hour),
 	})
 
 	return ctx.String(http.StatusCreated, "Sign up successfully")
@@ -54,9 +54,9 @@ func (h *handlers) SignIn(ctx echo.Context) error {
 	}
 
 	ctx.SetCookie(&http.Cookie{
-		Name:    h.cfg.Auth.CookieName,
+		Name:    h.cfg.AuthCookieName,
 		Value:   token,
-		Expires: time.Now().Add(time.Duration(h.cfg.Auth.TTL) * time.Hour),
+		Expires: time.Now().Add(time.Duration(h.cfg.AuthTTL) * time.Hour),
 	})
 
 	return ctx.String(http.StatusCreated, "Sign in successfully")
@@ -64,7 +64,7 @@ func (h *handlers) SignIn(ctx echo.Context) error {
 
 func (h *handlers) SignOut(ctx echo.Context) error {
 	ctx.SetCookie(&http.Cookie{
-		Name:    h.cfg.Auth.CookieName,
+		Name:    h.cfg.AuthCookieName,
 		Value:   "",
 		Expires: time.Now(),
 	})

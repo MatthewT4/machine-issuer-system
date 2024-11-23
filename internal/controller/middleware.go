@@ -13,14 +13,14 @@ import (
 
 func (h *handlers) AuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		cookie, err := c.Cookie(h.cfg.Auth.CookieName)
+		cookie, err := c.Cookie(h.cfg.AuthCookieName)
 		if err != nil {
 			return err
 		}
 
 		jwtToken := cookie.Value
 
-		claims, err := jwt.ParseToken(jwtToken, h.cfg.Auth.SecretKey)
+		claims, err := jwt.ParseToken(jwtToken, h.cfg.AuthSecretKey)
 		if err != nil {
 			return err
 		}

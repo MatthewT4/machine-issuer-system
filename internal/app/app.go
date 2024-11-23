@@ -24,6 +24,8 @@ func NewApplication(logger *slog.Logger) (*Application, error) {
 		return nil, fmt.Errorf("get config: %w", err)
 	}
 
+	logger.Info("config loaded successfully")
+
 	pgStorage := storage.NewPgStorage(config.DbURL, logger)
 
 	core := appCore.NewCore(pgStorage, logger, config)
@@ -40,6 +42,7 @@ func NewApplication(logger *slog.Logger) (*Application, error) {
 
 func (p *Application) Start() error {
 	p.logger.Info("Starting app")
+
 	err := p.storage.Connect(context.Background())
 	if err != nil {
 		return fmt.Errorf("connection to database: %w", err)

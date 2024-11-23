@@ -20,7 +20,6 @@ func NewPgStorage(dbURL string, logger *slog.Logger) *PgStorage {
 }
 
 func (p *PgStorage) Connect(ctx context.Context) error {
-
 	config, err := pgxpool.ParseConfig(p.dbURL)
 	if err != nil {
 		return fmt.Errorf("parce config: %w", err)
@@ -30,6 +29,7 @@ func (p *PgStorage) Connect(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("create connect: %v", err)
 	}
+
 	err = connect.Ping(ctx)
 	if err != nil {
 		return fmt.Errorf("ping connect: %w", err)

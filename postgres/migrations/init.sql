@@ -24,5 +24,5 @@ CREATE TABLE permission_handlers
     id SERIAL PRIMARY KEY,
     method TEXT NOT NULL,
     path TEXT NOT NULL,
-    roles []INTEGER
+    roles INTEGER[]
 )

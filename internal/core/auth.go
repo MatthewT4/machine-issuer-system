@@ -45,7 +45,7 @@ func (c *Core) SignUp(ctx context.Context, params model.SignUpRequest) (token st
 		return token, err
 	}
 
-	token, err = jwt.NewToken(user, c.cfg.Auth.SecretKey, time.Duration(c.cfg.Auth.TTL)*time.Hour)
+	token, err = jwt.NewToken(user, c.cfg.AuthSecretKey, time.Duration(c.cfg.AuthTTL)*time.Hour)
 	if err != nil {
 		log.Error("failed to generate token", err.Error())
 
@@ -78,7 +78,7 @@ func (c *Core) SignIn(ctx context.Context, params model.SignInRequest) (token st
 		return "", fmt.Errorf("%s: %w", op, errorlist.ErrInvalidCredentials)
 	}
 
-	token, err = jwt.NewToken(user, c.cfg.Auth.SecretKey, time.Duration(c.cfg.Auth.TTL)*time.Hour)
+	token, err = jwt.NewToken(user, c.cfg.AuthSecretKey, time.Duration(c.cfg.AuthTTL)*time.Hour)
 	if err != nil {
 		log.Error("failed to generate token", err.Error())
 
