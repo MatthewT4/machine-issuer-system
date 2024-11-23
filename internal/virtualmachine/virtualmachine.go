@@ -12,7 +12,6 @@ import (
 )
 
 const (
-	filePath   = "/Users/mixalight/.ssh/id_ed25519" //change on another vm
 	port       = "22"
 	passPhrase = "cloud" //remove if another vm
 )
@@ -30,14 +29,14 @@ func publicKeyFile(file string) (ssh.AuthMethod, error) {
 		return nil, fmt.Errorf("failed to read file: %w", err)
 	}
 
-	publicKey, err := ssh.ParsePrivateKeyWithPassphrase(publicKeyBytes, []byte(passPhrase))
+	publicKey, err := ssh.ParsePrivateKey(publicKeyBytes)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse private key: %w", err)
 	}
 	return ssh.PublicKeys(publicKey), nil
 }
 
-func CreateConnection(ip string) (*ssh.Session, error) {
+func CreateConnection(ip string, filePath string) (*ssh.Session, error) {
 	publicKey, err := publicKeyFile(filePath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get ssh public key: %w", err)

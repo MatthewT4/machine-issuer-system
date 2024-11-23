@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+
 	"machineIssuerSystem/internal/model"
 
 	"github.com/google/uuid"
@@ -95,17 +96,10 @@ func (p *PgStorage) UnRentServer(ctx context.Context, serverID uuid.UUID) error 
 func (p *PgStorage) GetServerIp(ctx context.Context, serverID uuid.UUID) (string, error) {
 	sql := "SELECT ip FROM servers WHERE id = $1"
 
-	rows, err := p.connections.Query(ctx, sql, serverID)
+	var ip string
+	err := p.connections.QueryRow(ctx, sql, serverID).Scan(&ip)
 	if err != nil {
-		return "", fmt.Errorf("queryex: %w", err)
-	}
-	ip, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[string])
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return "", &model.ErrNotFound{}
-		}
-
-		return "", err
+		return "", fmt.Errorf("GetServerIp: %w", err)
 	}
 
 	return ip, nil

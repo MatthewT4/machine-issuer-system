@@ -61,6 +61,7 @@ func (h *handlers) PermissionMiddleware(next echo.HandlerFunc) echo.HandlerFunc 
 		method := c.Request().Method
 		path := c.Request().URL.Path
 		ctxRole := c.Get("role")
+		log.Info("params", method, path)
 
 		var role float64
 		if ctxRole != nil {

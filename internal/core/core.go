@@ -125,7 +125,9 @@ func (c *Core) GetMetrics(ctx context.Context, serverID uuid.UUID) (response mod
 		return response, err
 	}
 
-	session, err := vm.CreateConnection(ip)
+	log.Info("ip", ip)
+
+	session, err := vm.CreateConnection(ip, c.cfg.SSHFilePath)
 	if err != nil {
 		log.Error("failed to create connection", err)
 

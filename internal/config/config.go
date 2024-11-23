@@ -10,6 +10,7 @@ type Config struct {
 	AuthSecretKey  string `env:"AUTH_SECRET_KEY,required"`
 	AuthTTL        int64  `env:"AUTH_TTL" envDefault:"24"` // hours
 	AuthCookieName string `env:"AUTH_COOKIE_NAME" envDefault:"session_cookie"`
+	SSHFilePath    string `env:"SSH_FILE_PATH"` // path to private ssh key
 }
 
 func GetConfig() (Config, error) {
