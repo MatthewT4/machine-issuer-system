@@ -116,6 +116,7 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Server"
+
   /servers/my:
     get:
       operationId: GetMyServers
@@ -138,6 +139,14 @@ paths:
           schema:
             type: string
             format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                booking_days:
+                  type: integer
       responses:
         200:
           description: Return user
@@ -183,6 +192,7 @@ paths:
           description: Server not found
         500:
           description: Internal server error
+
   /reboot/{server_id}:
     get:
       operationId: Reboot server
@@ -200,6 +210,7 @@ paths:
           description: Server not found
         500:
           description: Internal server error
+
   /vmusers/add/{server_id}:
     get:
       operationId: Create user on vm

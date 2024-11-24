@@ -47,11 +47,19 @@ type SignUpJSONBody struct {
 	Username *string `json:"username,omitempty"`
 }
 
+// RentServerJSONBody defines parameters for RentServer.
+type RentServerJSONBody struct {
+	BookingDays *int `json:"booking_days,omitempty"`
+}
+
 // SignInJSONRequestBody defines body for SignIn for application/json ContentType.
 type SignInJSONRequestBody SignInJSONBody
 
 // SignUpJSONRequestBody defines body for SignUp for application/json ContentType.
 type SignUpJSONRequestBody SignUpJSONBody
+
+// RentServerJSONRequestBody defines body for RentServer for application/json ContentType.
+type RentServerJSONRequestBody RentServerJSONBody
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {

@@ -1,4 +1,4 @@
-package workers
+package metrics
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 	"machineIssuerSystem/internal/core"
 )
 
-type Metric struct {
+type Worker struct {
 	cfg    config.Config
 	logger *slog.Logger
 
@@ -24,7 +24,7 @@ type Metric struct {
 	memUsage    *prometheus.GaugeVec
 }
 
-func NewMetric(cfg config.Config, logger *slog.Logger, core *core.Core) *Metric {
+func NewWorker(cfg config.Config, logger *slog.Logger, core *core.Core) *Worker {
 	serverCountGauge := prometheus.NewGauge(prometheus.GaugeOpts{
 		Name: "servers_count",
 		Help: "Number of servers",
@@ -60,7 +60,7 @@ func NewMetric(cfg config.Config, logger *slog.Logger, core *core.Core) *Metric 
 	prometheus.MustRegister(ramUsageGauge)
 	prometheus.MustRegister(memUsageGauge)
 
-	return &Metric{
+	return &Worker{
 		cfg:         cfg,
 		logger:      logger,
 		core:        core,
@@ -72,14 +72,12 @@ func NewMetric(cfg config.Config, logger *slog.Logger, core *core.Core) *Metric 
 	}
 }
 
-func (m *Metric) Start(ctx context.Context) {
+func (m *Worker) Start(ctx context.Context) {
 	ticker := time.NewTicker(time.Duration(5) * time.Second)
 
 	for {
 		select {
 		case <-ticker.C:
-			m.logger.Info("Metric tick")
-
 			servers, err := m.core.GetAvailableServers(context.Background())
 			if err != nil {
 				m.logger.Error("Error getting available servers", err)
@@ -92,7 +90,6 @@ func (m *Metric) Start(ctx context.Context) {
 					m.logger.Error("Error getting metrics", err)
 					continue
 				}
-				m.logger.Info("metric", metric)
 
 				m.uptime.WithLabelValues(server.Title).Set(float64(metric.Uptime))
 				m.cpuUsage.WithLabelValues(server.Title).Set(metric.CPU)

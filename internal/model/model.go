@@ -1,6 +1,8 @@
 package model
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 
 	vm "machineIssuerSystem/internal/virtualmachine"
@@ -15,13 +17,14 @@ type Product struct {
 }
 
 type Server struct {
-	ID     uuid.UUID
-	Title  string
-	CPU    int
-	Memory int
-	Disk   int
-	RentBy *uuid.UUID
-	IP     string
+	ID        uuid.UUID
+	Title     string
+	CPU       int
+	Memory    int
+	Disk      int
+	RentBy    *uuid.UUID
+	IP        string
+	RentUntil *time.Time
 }
 
 type Metric struct {
@@ -38,4 +41,8 @@ func FromPkgToDomain(req vm.Metrics) Metric {
 		RAM:    req.RAM,
 		Memory: req.MEM,
 	}
+}
+
+type RentServerRequest struct {
+	BookingDays int64
 }

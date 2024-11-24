@@ -18,4 +18,9 @@ SELECT id, method, path, roles
 FROM permission_handlers
 WHERE method = $1 and $2 ILIKE path;
 `
+
+	queryFetchExpiredServers = `
+SELECT id, title, cpu, memory, disk, rent_by, ip, rent_until
+FROM servers
+WHERE rent_until < NOW() + INTERVAL '3 hours'`
 )

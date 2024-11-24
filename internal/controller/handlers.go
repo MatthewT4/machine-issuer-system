@@ -1,7 +1,10 @@
 package controller
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
+	"io"
 	"log/slog"
 	"net/http"
 
@@ -15,6 +18,10 @@ import (
 )
 
 var userID = uuid.MustParse("00000000-0000-0000-0000-000000000001")
+
+const (
+	defaultBookingDays = 7
+)
 
 type handlers struct {
 	core *core.Core
@@ -34,11 +41,27 @@ func newHandlers(core *core.Core, logger *slog.Logger, cfg config.Config) *handl
 
 // (POST /rent/{server_id})
 func (p *handlers) RentServer(ctx echo.Context, serverId openapi_types.UUID) error {
-	err := p.core.RentServer(
+	body, err := io.ReadAll(ctx.Request().Body)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	request := model.RentServerRequest{}
+	if err = json.Unmarshal(body, &request); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	if request.BookingDays == 0 {
+		request.BookingDays = defaultBookingDays
+	}
+
+	err = p.core.RentServer(
 		ctx.Request().Context(),
 		userID,
 		serverId,
+		request.BookingDays,
 	)
+	fmt.Println(err)
 	return p.convertCoreErrorToResponse(err)
 }
 

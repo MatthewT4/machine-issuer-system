@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"math/big"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -20,8 +21,9 @@ type Storage interface {
 	GetAvailableServers(ctx context.Context) ([]model.Server, error)
 	GetMyServers(ctx context.Context, userID uuid.UUID) ([]model.Server, error)
 	GetServer(ctx context.Context, serverID uuid.UUID) (model.Server, error)
-	RentServer(ctx context.Context, serverID uuid.UUID, userID uuid.UUID) error
+	RentServer(ctx context.Context, serverID uuid.UUID, userID uuid.UUID, rentUntil time.Time) error
 	UnRentServer(ctx context.Context, serverID uuid.UUID) error
+	ExpiredServers(ctx context.Context) ([]model.Server, error)
 
 	CreateUser(ctx context.Context, user model.User) (result model.User, err error)
 	GetUserByUsername(ctx context.Context, username string) (result model.User, err error)
@@ -69,8 +71,7 @@ func (c *Core) GetMyServers(ctx context.Context, userID uuid.UUID) ([]model.Serv
 	return servers, err
 }
 
-func (c *Core) RentServer(ctx context.Context, userID uuid.UUID, serverID uuid.UUID) error {
-	c.logger.Info("fdfd", slog.Any("dfd", serverID))
+func (c *Core) RentServer(ctx context.Context, userID uuid.UUID, serverID uuid.UUID, bookingDays int64) error {
 	server, err := c.storage.GetServer(ctx, serverID)
 	if err != nil {
 		if errors.Is(err, &model.ErrNotFound{}) {
@@ -81,12 +82,17 @@ func (c *Core) RentServer(ctx context.Context, userID uuid.UUID, serverID uuid.U
 	if server.RentBy != nil {
 		return &model.ErrBadRequest{}
 	}
-	err = c.storage.RentServer(ctx, serverID, userID)
+
+	rentUntil := time.Now().Add(time.Duration(bookingDays) * 24 * time.Hour)
+
+	err = c.storage.RentServer(ctx, serverID, userID, rentUntil)
 	if err != nil {
 		if errors.Is(err, &model.ErrNotFound{}) {
 			return err
 		}
 		c.logger.Error("rent fail", slog.Any("server", server), slog.Any("user", userID), slog.Any("error", err))
+
+		return err
 	}
 	c.logger.Debug("rent ok", slog.Any("server", server), slog.Any("user", userID))
 	return nil
@@ -109,6 +115,7 @@ func (c *Core) UnRentServer(ctx context.Context, serverID uuid.UUID) error {
 			return err
 		}
 		c.logger.Error("unrent fail", slog.Any("server", server), slog.Any("error", err))
+		return err
 	}
 	c.logger.Debug("unrent ok", slog.Any("server", server))
 	return nil
@@ -150,7 +157,7 @@ func (c *Core) GetServer(ctx context.Context, serverID uuid.UUID) (model.Server,
 
 func (c *Core) RebootServer(ctx context.Context, serverID uuid.UUID) error {
 	log := c.logger.With(
-		slog.String("op", "core.GetMetrics"),
+		slog.String("op", "core.RebootServer"),
 		slog.String("server_id", serverID.String()))
 	ip, err := c.storage.GetServerIp(ctx, serverID)
 	if err != nil {
@@ -212,6 +219,23 @@ func (c *Core) CreateUserOnVm(ctx context.Context, serverID uuid.UUID) error {
 		return err
 	}
 	return nil
+}
+
+func (c *Core) FetchExpiredServers(ctx context.Context) ([]model.Server, error) {
+	log := c.logger.With(
+		slog.String("op", "core.GetMetrics"))
+
+	servers, err := c.storage.ExpiredServers(ctx)
+	if err != nil {
+		log.Error("failed to fetch expired servers", err)
+
+		if errors.Is(err, &model.ErrNotFound{}) {
+			return nil, &model.ErrNotFound{}
+		}
+		return nil, &model.ErrInternal{}
+	}
+
+	return servers, nil
 }
 
 func generatePassword(passwordLength int) (string, error) {

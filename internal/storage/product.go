@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"time"
 
 	"machineIssuerSystem/internal/model"
 
@@ -69,10 +70,10 @@ func (p *PgStorage) GetServer(ctx context.Context, serverID uuid.UUID) (model.Se
 	return server, nil
 }
 
-func (p *PgStorage) RentServer(ctx context.Context, serverID uuid.UUID, userID uuid.UUID) error {
-	sql := "UPDATE servers SET rent_by = $1 WHERE id = $2"
+func (p *PgStorage) RentServer(ctx context.Context, serverID uuid.UUID, userID uuid.UUID, rentUntil time.Time) error {
+	sql := "UPDATE servers SET rent_by = $1, rent_until = $2 WHERE id = $3"
 
-	res, err := p.connections.Exec(ctx, sql, userID, serverID)
+	res, err := p.connections.Exec(ctx, sql, userID, rentUntil, serverID)
 	if err != nil {
 		return fmt.Errorf("RentServer exec: %w", err)
 	}
@@ -82,7 +83,7 @@ func (p *PgStorage) RentServer(ctx context.Context, serverID uuid.UUID, userID u
 }
 
 func (p *PgStorage) UnRentServer(ctx context.Context, serverID uuid.UUID) error {
-	sql := "UPDATE servers SET rent_by = Null WHERE id = $1"
+	sql := "UPDATE servers SET rent_by = NULL, rent_until = NULL WHERE id = $1"
 
 	res, err := p.connections.Exec(ctx, sql, serverID)
 	if err != nil {
@@ -103,4 +104,18 @@ func (p *PgStorage) GetServerIp(ctx context.Context, serverID uuid.UUID) (string
 	}
 
 	return ip, nil
+}
+
+func (p *PgStorage) ExpiredServers(ctx context.Context) ([]model.Server, error) {
+	rows, err := p.connections.Query(ctx, queryFetchExpiredServers)
+	if err != nil {
+		return nil, fmt.Errorf("queryex: %w", err)
+	}
+
+	servers, err := pgx.CollectRows(rows, pgx.RowToStructByName[model.Server])
+	if err != nil {
+		return nil, fmt.Errorf("collect rows: %w", err)
+	}
+
+	return servers, nil
 }
