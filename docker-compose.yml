@@ -30,3 +30,20 @@ services:
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend
+    ports:
+      - "80:80"
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - "5000:5000"
+    depends_on:
+      - backend
+#      - frontend
