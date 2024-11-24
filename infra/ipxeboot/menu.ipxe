@@ -1,0 +1,12 @@
+#!ipxe
+
+menu iPXE Boot Menu
+
+item ubuntu Ubuntu Installation
+
+chose --default ubuntu --timeout 3000 selected
+
+iseq ${selected} ubuntu && sandboot http://192.168.1.104/ubuntu.iso || \
+kernel http://192.168.1.104/ubuntu/linux auto=true priority=critical \
+preseed/url=http://192.168.1.104/unubtu/preseed/cfg \
+initrd=http://192.168.1.104/ubuntu/initrd.gz
