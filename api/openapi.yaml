@@ -217,6 +217,22 @@ paths:
         500:
           description: Internal server error
 
+  /roles/is_admin:
+    get:
+      operationId: IsAdmin
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  is_admin:
+                    type: boolean
+        500:
+          description: internal server error
+
 #  /vmusers/add/{server_id}:
 #    get:
 #      operationId: Create user on vm

@@ -27,6 +27,7 @@ type Storage interface {
 
 	CreateUser(ctx context.Context, user model.User) (result model.User, err error)
 	GetUserByUsername(ctx context.Context, username string) (result model.User, err error)
+	GetUserByID(ctx context.Context, id uuid.UUID) (model.User, error)
 
 	GetPermissionHandler(ctx context.Context, params model.GetPermissionHandlerRequest) (model.PermissionHandler, error)
 

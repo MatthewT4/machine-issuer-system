@@ -61,11 +61,7 @@ func (c *Core) SignUp(ctx context.Context, params model.SignUpRequest) (token st
 
 func (c *Core) SignIn(ctx context.Context, params model.SignInRequest) (token string, err error) {
 	const op = "authCore.SignIn"
-	ff, err := bcrypt.GenerateFromPassword([]byte(params.Password), bcrypt.DefaultCost)
-	if err != nil {
-		return "", err
-	}
-	fmt.Println(string(ff))
+
 	log := c.logger.With(
 		slog.String("op", op),
 		slog.String("username", params.Username),
@@ -106,4 +102,22 @@ func (c *Core) GetPermissionHandler(
 	}
 
 	return response, nil
+}
+
+func (c *Core) IsAdmin(ctx context.Context, id uuid.UUID) (bool, error) {
+	const op = "authCore.IsAdmin"
+	log := c.logger.With(slog.String("op", op))
+
+	user, err := c.storage.GetUserByID(ctx, id)
+	if err != nil {
+		log.Error("failed to fetch user", err.Error())
+		return false, err
+	}
+
+	var isAdmin bool
+	if user.Role == roles.Admin {
+		isAdmin = true
+	}
+
+	return isAdmin, nil
 }

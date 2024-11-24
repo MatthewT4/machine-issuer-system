@@ -13,6 +13,12 @@ FROM users
 WHERE username = $1
 `
 
+	queryGetUserByID = `
+SELECT id, email, username, password, role, created_at, updated_at 
+FROM users
+WHERE id = $1
+`
+
 	queryGetPermissionHandler = `
 SELECT id, method, path, roles
 FROM permission_handlers

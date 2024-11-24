@@ -85,6 +85,9 @@ type ServerInterface interface {
 	// (POST /rent/{server_id})
 	RentServer(ctx echo.Context, serverId openapi_types.UUID) error
 
+	// (GET /roles/is_admin)
+	IsAdmin(ctx echo.Context) error
+
 	// (GET /servers/available)
 	GetAvailableServers(ctx echo.Context) error
 
@@ -191,6 +194,15 @@ func (w *ServerInterfaceWrapper) RentServer(ctx echo.Context) error {
 	return err
 }
 
+// IsAdmin converts echo context to params.
+func (w *ServerInterfaceWrapper) IsAdmin(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.IsAdmin(ctx)
+	return err
+}
+
 // GetAvailableServers converts echo context to params.
 func (w *ServerInterfaceWrapper) GetAvailableServers(ctx echo.Context) error {
 	var err error
@@ -260,6 +272,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.GET(baseURL+"/reboot/:server_id", wrapper.RebootServer)
 	router.DELETE(baseURL+"/rent/:server_id", wrapper.UnRentServer)
 	router.POST(baseURL+"/rent/:server_id", wrapper.RentServer)
+	router.GET(baseURL+"/roles/is_admin", wrapper.IsAdmin)
 	router.GET(baseURL+"/servers/available", wrapper.GetAvailableServers)
 	router.GET(baseURL+"/servers/my", wrapper.GetMyServers)
 	router.GET(baseURL+"/servers/:server_id", wrapper.GetServer)

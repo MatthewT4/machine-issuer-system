@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 
 	"machineIssuerSystem/internal/model"
@@ -35,6 +36,25 @@ func (p *PgStorage) GetUserByUsername(ctx context.Context, username string) (mod
 		ctx,
 		queryGetUserByUsername,
 		username,
+	)
+	if err != nil {
+		return model.User{}, fmt.Errorf("%s: %w", op, err)
+	}
+	user, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[model.User])
+	if err != nil {
+		return model.User{}, fmt.Errorf("%s: %w", op, err)
+	}
+
+	return user, nil
+}
+
+func (p *PgStorage) GetUserByID(ctx context.Context, id uuid.UUID) (model.User, error) {
+	const op = "storage.GetUserByUsername"
+
+	rows, err := p.connections.Query(
+		ctx,
+		queryGetUserByID,
+		id,
 	)
 	if err != nil {
 		return model.User{}, fmt.Errorf("%s: %w", op, err)

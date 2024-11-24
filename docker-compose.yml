@@ -1,6 +1,6 @@
 version: '3.7'
 services:
-  issuer_postgres:
+  postgres:
     build:
       context: postgres
     environment:
@@ -11,6 +11,9 @@ services:
       - "35432:5432"
     healthcheck:
       test: "pg_isready -p 5432 -h 127.0.0.1"
+    networks:
+      - app-network
+
 
   prometheus:
     image: prom/prometheus:latest
@@ -21,6 +24,9 @@ services:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
+    networks:
+      - app-network
+
 
   grafana:
     image: grafana/grafana:latest
@@ -30,14 +36,33 @@ services:
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
+    networks:
+      - app-network
+
 
   backend:
     build:
-      context: ./backend
+      context: .
       dockerfile: Dockerfile
     container_name: backend
     ports:
       - "80:80"
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+
+
+  frontend:
+    build:
+      context: ./../kafedra
+      dockerfile: Dockerfile
+    container_name: frontend
+    ports:
+      - "4200:4200"
+    networks:
+      - app-network
+
 
   nginx:
     image: nginx:latest
@@ -46,4 +71,11 @@ services:
       - "5000:5000"
     depends_on:
       - backend
-#      - frontend
+      - frontend
+    networks:
+      - app-network
+
+
+networks:
+  app-network:
+    driver: bridge
