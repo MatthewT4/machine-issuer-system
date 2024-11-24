@@ -86,7 +86,7 @@ func (c *Core) RentServer(
 		return model.VMLoginResponse{}, &model.ErrBadRequest{}
 	}
 	if server.RentBy != nil {
-		return model.VMLoginResponse{}, &model.ErrBadRequest{}
+		return model.VMLoginResponse{}, &model.ErrNotFound{}
 	}
 
 	rentUntil := time.Now().Add(time.Duration(bookingDays) * 24 * time.Hour)

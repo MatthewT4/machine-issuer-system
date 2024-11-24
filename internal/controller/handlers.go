@@ -62,7 +62,15 @@ func (p *handlers) RentServer(ctx echo.Context, serverId openapi_types.UUID) err
 		request.BookingDays,
 	)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		var errNotFound *model.ErrNotFound
+		switch {
+		case errors.As(err, &errNotFound):
+			p.logger.Debug("server already using or not found")
+			return echo.NewHTTPError(http.StatusNotFound, "server already using or not found")
+		default:
+			p.logger.Error("Rent Server unknown error", slog.Any("error", err))
+			return echo.ErrInternalServerError
+		}
 	}
 
 	fmt.Printf("RESPONSE: %+v\n", resp)
