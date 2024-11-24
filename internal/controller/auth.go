@@ -54,6 +54,9 @@ func (h *handlers) SignIn(ctx echo.Context) error {
 	}
 
 	ctx.SetCookie(&http.Cookie{
+		Domain:  "localhost",
+		Secure:  false,
+		Path:    "/",
 		Name:    h.cfg.AuthCookieName,
 		Value:   token,
 		Expires: time.Now().Add(time.Duration(h.cfg.AuthTTL) * time.Hour),

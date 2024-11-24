@@ -44,3 +44,6 @@ VALUES ('4f45b109-0e26-43b0-abcb-52b216b69a1e', 'yandex-cloud-1', 12, 8192, 1600
 
 INSERT INTO public.servers (id, title, cpu, memory, disk, rent_by, ip)
 VALUES ('4f45b109-0e26-43b0-abcb-52b216b69a1a', 'baikal-1', 12, 8192, 16000, null, '87.251.74.153');
+
+
+INSERT INTO public.users (id, email, username, password, role, created_at, updated_at) VALUES ('00000000-0000-0000-0000-000000000001', '2342fdsdf', 'test', '$2a$10$sKMAr4MGSD5x.yOX8/wD3OwzuuxkxyxbGTJ7oMrFH1RC.l6J084..', 1, '2024-11-23 21:48:02.000000', '2024-11-23 21:48:05.000000');

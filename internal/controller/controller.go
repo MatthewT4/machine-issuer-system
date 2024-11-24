@@ -29,7 +29,7 @@ func NewController(core *core.Core, port uint16, logger *slog.Logger, cfg config
 	e := echo.New()
 
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins:     []string{"http://localhost:4200"}, // Замените на разрешённые домены
+		AllowOrigins:     []string{"http://localhost"}, // Замените на разрешённые домены
 		AllowMethods:     []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete, http.MethodOptions, http.MethodOptions},
 		AllowHeaders:     []string{"Refer", echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
 		AllowCredentials: true,
