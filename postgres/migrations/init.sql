@@ -39,7 +39,7 @@ VALUES ('POST', '/auth/signup', '{0, 1, 2, 3}'),
        ('GET', '/metrics', '{0, 1, 2, 3}');
 
 INSERT INTO public.servers (id, title, cpu, memory, disk, rent_by, ip)
-VALUES ('4f45b109-0e26-43b0-abcb-52b216b69a1e', 'q222', 12, 8192, 16000, null, '51.250.41.219');
+VALUES ('4f45b109-0e26-43b0-abcb-52b216b69a1e', 'yandex-cloud-1', 12, 8192, 16000, null, '51.250.41.219');
 
 INSERT INTO public.servers (id, title, cpu, memory, disk, rent_by, ip)
-VALUES ('4f45b109-0e26-43b0-abcb-52b216b69a1a', 'q223', 12, 8192, 16000, null, '87.251.74.153');
+VALUES ('4f45b109-0e26-43b0-abcb-52b216b69a1a', 'baikal-1', 12, 8192, 16000, null, '87.251.74.153');
