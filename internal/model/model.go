@@ -46,3 +46,9 @@ func FromPkgToDomain(req vm.Metrics) Metric {
 type RentServerRequest struct {
 	BookingDays int64
 }
+
+type VMLoginResponse struct {
+	IP       string
+	Login    string
+	Password string
+}

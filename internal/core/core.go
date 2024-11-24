@@ -71,16 +71,22 @@ func (c *Core) GetMyServers(ctx context.Context, userID uuid.UUID) ([]model.Serv
 	return servers, err
 }
 
-func (c *Core) RentServer(ctx context.Context, userID uuid.UUID, serverID uuid.UUID, bookingDays int64) error {
+func (c *Core) RentServer(
+	ctx context.Context,
+	userID uuid.UUID,
+	serverID uuid.UUID,
+	bookingDays int64,
+) (model.VMLoginResponse, error) {
 	server, err := c.storage.GetServer(ctx, serverID)
 	if err != nil {
+		c.logger.Error(err.Error())
 		if errors.Is(err, &model.ErrNotFound{}) {
-			return &model.ErrNotFound{}
+			return model.VMLoginResponse{}, &model.ErrNotFound{}
 		}
-		return &model.ErrBadRequest{}
+		return model.VMLoginResponse{}, &model.ErrBadRequest{}
 	}
 	if server.RentBy != nil {
-		return &model.ErrBadRequest{}
+		return model.VMLoginResponse{}, &model.ErrBadRequest{}
 	}
 
 	rentUntil := time.Now().Add(time.Duration(bookingDays) * 24 * time.Hour)
@@ -88,14 +94,22 @@ func (c *Core) RentServer(ctx context.Context, userID uuid.UUID, serverID uuid.U
 	err = c.storage.RentServer(ctx, serverID, userID, rentUntil)
 	if err != nil {
 		if errors.Is(err, &model.ErrNotFound{}) {
-			return err
+			return model.VMLoginResponse{}, err
 		}
 		c.logger.Error("rent fail", slog.Any("server", server), slog.Any("user", userID), slog.Any("error", err))
 
-		return err
+		return model.VMLoginResponse{}, err
 	}
 	c.logger.Debug("rent ok", slog.Any("server", server), slog.Any("user", userID))
-	return nil
+
+	response, err := c.CreateUserOnVm(ctx, serverID)
+	if err != nil {
+		return model.VMLoginResponse{}, err
+	}
+
+	response.IP = server.IP
+
+	return response, nil
 }
 
 func (c *Core) UnRentServer(ctx context.Context, serverID uuid.UUID) error {
@@ -182,29 +196,29 @@ func (c *Core) RebootServer(ctx context.Context, serverID uuid.UUID) error {
 	return nil
 }
 
-func (c *Core) CreateUserOnVm(ctx context.Context, serverID uuid.UUID) error {
+func (c *Core) CreateUserOnVm(ctx context.Context, serverID uuid.UUID) (model.VMLoginResponse, error) {
 	log := c.logger.With(
 		slog.String("op", "core.GetMetrics"),
 		slog.String("server_id", serverID.String()))
 	ip, err := c.storage.GetServerIp(ctx, serverID)
 	if err != nil {
 		if errors.Is(err, &model.ErrNotFound{}) {
-			return &model.ErrNotFound{}
+			return model.VMLoginResponse{}, &model.ErrNotFound{}
 		}
-		return err
+		return model.VMLoginResponse{}, err
 	}
 	log.Info("ip", ip)
 	session, err := vm.CreateConnection(ip, c.cfg.SSHFilePath)
 	if err != nil {
 		log.Error("failed to create connection", err)
-		return err
+		return model.VMLoginResponse{}, err
 	}
 	defer session.Close()
 	login := "user"
 	password, err := generatePassword(10)
 	if err != nil {
 		log.Error("failed to generate password for vm user", err)
-		return err
+		return model.VMLoginResponse{}, err
 	}
 	createUserCommands := []string{
 		fmt.Sprintf(vm.CreateUser, login),
@@ -216,9 +230,15 @@ func (c *Core) CreateUserOnVm(ctx context.Context, serverID uuid.UUID) error {
 	err = vm.ExecuteCommandsOnVirtualMachine(session, commands)
 	if err != nil {
 		log.Error("failed to execute commands on virtual machine", err)
-		return err
+		return model.VMLoginResponse{}, err
 	}
-	return nil
+
+	response := model.VMLoginResponse{
+		Login:    login,
+		Password: password,
+	}
+
+	return response, nil
 }
 
 func (c *Core) FetchExpiredServers(ctx context.Context) ([]model.Server, error) {

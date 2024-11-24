@@ -150,6 +150,12 @@ paths:
       responses:
         200:
           description: Return user
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Server"
         400:
           description: Server is rent already
         404:
@@ -211,23 +217,23 @@ paths:
         500:
           description: Internal server error
 
-  /vmusers/add/{server_id}:
-    get:
-      operationId: Create user on vm
-      parameters:
-        - name: server_id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        200:
-          description: Successfully create user role
-        404:
-          description: Server not found
-        500:
-          description: Internal server error
+#  /vmusers/add/{server_id}:
+#    get:
+#      operationId: Create user on vm
+#      parameters:
+#        - name: server_id
+#          in: path
+#          required: true
+#          schema:
+#            type: string
+#            format: uuid
+#      responses:
+#        200:
+#          description: Successfully create user role
+#        404:
+#          description: Server not found
+#        500:
+#          description: Internal server error
 
 components:
   schemas:
@@ -267,3 +273,12 @@ components:
           type: string
         mem:
           type: integer
+    VMLogin:
+      type: object
+      properties:
+        ip:
+          type: string
+        login:
+          type: string
+        password:
+          type: string

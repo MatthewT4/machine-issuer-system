@@ -55,14 +55,19 @@ func (p *handlers) RentServer(ctx echo.Context, serverId openapi_types.UUID) err
 		request.BookingDays = defaultBookingDays
 	}
 
-	err = p.core.RentServer(
+	resp, err := p.core.RentServer(
 		ctx.Request().Context(),
 		userID,
 		serverId,
 		request.BookingDays,
 	)
-	fmt.Println(err)
-	return p.convertCoreErrorToResponse(err)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	fmt.Printf("RESPONSE: %+v\n", resp)
+
+	return ctx.JSON(http.StatusOK, resp)
 }
 
 func (p *handlers) UnRentServer(ctx echo.Context, serverId openapi_types.UUID) error {
@@ -144,7 +149,7 @@ func (p *handlers) RebootServer(ctx echo.Context, serverId openapi_types.UUID) e
 }
 
 func (p *handlers) CreateUserOnVm(ctx echo.Context, serverId openapi_types.UUID) error {
-	err := p.core.CreateUserOnVm(
+	_, err := p.core.CreateUserOnVm(
 		ctx.Request().Context(),
 		serverId,
 	)
