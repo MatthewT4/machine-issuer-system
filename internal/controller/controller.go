@@ -37,8 +37,8 @@ func NewController(core *core.Core, port uint16, logger *slog.Logger, cfg config
 	productHandlers := newHandlers(core, logger, cfg)
 	api.RegisterHandlers(e, productHandlers)
 
-	//e.Use(productHandlers.AuthMiddleware)
-	//e.Use(productHandlers.PermissionMiddleware)
+	e.Use(productHandlers.AuthMiddleware)
+	e.Use(productHandlers.PermissionMiddleware)
 	return &Controller{
 		core:     core,
 		server:   e,

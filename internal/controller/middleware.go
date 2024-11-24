@@ -3,13 +3,9 @@ package controller
 import (
 	"fmt"
 	"log/slog"
-	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"github.com/samber/lo"
 
-	"machineIssuerSystem/internal/model"
-	"machineIssuerSystem/pkg/errorlist"
 	"machineIssuerSystem/pkg/jwt"
 )
 
@@ -81,19 +77,19 @@ func (h *handlers) PermissionMiddleware(next echo.HandlerFunc) echo.HandlerFunc 
 
 		log.Info(fmt.Sprintf("user with role: %f, id: %s", role, id))
 
-		resp, err := h.core.GetPermissionHandler(c.Request().Context(), model.GetPermissionHandlerRequest{
-			Method: method,
-			Path:   path,
-		})
-		if err != nil {
-			log.Error("failed to get permission: %v", err)
+		//resp, err := h.core.GetPermissionHandler(c.Request().Context(), model.GetPermissionHandlerRequest{
+		//	Method: method,
+		//	Path:   path,
+		//})
+		//if err != nil {
+		//	log.Error("failed to get permission: %v", err)
+		//
+		//	return err
+		//}
 
-			return err
-		}
-
-		if !lo.Contains(resp.Roles, int64(role)) {
-			return echo.NewHTTPError(http.StatusForbidden, errorlist.ErrHandlerNotAllowed)
-		}
+		//if !lo.Contains(resp.Roles, int64(role)) {
+		//	return echo.NewHTTPError(http.StatusForbidden, errorlist.ErrHandlerNotAllowed)
+		//}
 
 		return next(c)
 	}

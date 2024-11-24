@@ -17,8 +17,6 @@ import (
 	"machineIssuerSystem/internal/model"
 )
 
-var userID = uuid.MustParse("00000000-0000-0000-0000-000000000001")
-
 const (
 	defaultBookingDays = 7
 )
@@ -41,6 +39,11 @@ func newHandlers(core *core.Core, logger *slog.Logger, cfg config.Config) *handl
 
 // (POST /rent/{server_id})
 func (p *handlers) RentServer(ctx echo.Context, serverId openapi_types.UUID) error {
+	userID, ok := ctx.Get("id").(string)
+	if !ok {
+		p.logger.Info("could not get user id")
+	}
+
 	body, err := io.ReadAll(ctx.Request().Body)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -55,9 +58,14 @@ func (p *handlers) RentServer(ctx echo.Context, serverId openapi_types.UUID) err
 		request.BookingDays = defaultBookingDays
 	}
 
+	userUUID, err := uuid.Parse(userID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
 	resp, err := p.core.RentServer(
 		ctx.Request().Context(),
-		userID,
+		userUUID,
 		serverId,
 		request.BookingDays,
 	)
@@ -105,8 +113,17 @@ func (p *handlers) GetAvailableServers(ctx echo.Context) error {
 }
 
 func (p *handlers) GetMyServers(ctx echo.Context) error {
-	reqUserID := userID
-	servers, err := p.core.GetMyServers(ctx.Request().Context(), reqUserID)
+	userID, ok := ctx.Get("id").(string)
+	if !ok {
+		p.logger.Info("could not get user id")
+	}
+
+	userUUID, err := uuid.Parse(userID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	servers, err := p.core.GetMyServers(ctx.Request().Context(), userUUID)
 	if err != nil {
 		var errNotFound *model.ErrNotFound
 		switch {
